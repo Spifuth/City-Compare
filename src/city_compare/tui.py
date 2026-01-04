@@ -68,58 +68,58 @@ class CityCompareApp(App[None]):
     Screen {
         background: $surface;
     }
-    
+
     #main-container {
         width: 100%;
         height: 100%;
         padding: 1;
     }
-    
+
     #top-section {
         height: auto;
         margin-bottom: 1;
     }
-    
+
     #cities-section {
         height: auto;
         border: solid $primary;
         padding: 1;
         margin-bottom: 1;
     }
-    
+
     #cities-list {
         height: auto;
         margin-bottom: 1;
     }
-    
+
     #city-buttons {
         height: auto;
     }
-    
+
     #results-section {
         height: 1fr;
         border: solid $secondary;
         padding: 1;
     }
-    
+
     .city-tag {
         background: $primary;
         color: $text;
         padding: 0 1;
         margin: 0 1;
     }
-    
+
     #status-bar {
         height: 3;
         dock: bottom;
         background: $panel;
         padding: 1;
     }
-    
+
     DataTable {
         height: 100%;
     }
-    
+
     #modal-container {
         width: 60;
         height: auto;
@@ -127,23 +127,23 @@ class CityCompareApp(App[None]):
         background: $surface;
         padding: 2;
     }
-    
+
     #modal-title {
         text-align: center;
         margin-bottom: 1;
         text-style: bold;
     }
-    
+
     #modal-buttons {
         margin-top: 1;
         height: auto;
         align: center middle;
     }
-    
+
     #modal-buttons Button {
         margin: 0 1;
     }
-    
+
     #winner-display {
         text-align: center;
         text-style: bold;
@@ -152,7 +152,7 @@ class CityCompareApp(App[None]):
         background: $success;
         color: $text;
     }
-    
+
     ProgressBar {
         width: 100%;
     }

@@ -126,25 +126,25 @@ def _get_html_template() -> str:
             --dark: #2c3e50;
             --light: #ecf0f1;
         }}
-        
+
         * {{
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }}
-        
+
         body {{
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 2rem;
         }}
-        
+
         .container {{
             max-width: 1200px;
             margin: 0 auto;
         }}
-        
+
         .card {{
             background: white;
             border-radius: 16px;
@@ -152,27 +152,27 @@ def _get_html_template() -> str:
             padding: 2rem;
             margin-bottom: 2rem;
         }}
-        
+
         h1 {{
             color: var(--dark);
             text-align: center;
             margin-bottom: 0.5rem;
             font-size: 2.5rem;
         }}
-        
+
         .subtitle {{
             color: #7f8c8d;
             text-align: center;
             margin-bottom: 2rem;
         }}
-        
+
         h2 {{
             color: var(--dark);
             margin-bottom: 1rem;
             padding-bottom: 0.5rem;
             border-bottom: 2px solid var(--primary);
         }}
-        
+
         .ranking {{
             display: flex;
             justify-content: center;
@@ -180,7 +180,7 @@ def _get_html_template() -> str:
             flex-wrap: wrap;
             margin-bottom: 2rem;
         }}
-        
+
         .rank-card {{
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -190,119 +190,119 @@ def _get_html_template() -> str:
             min-width: 200px;
             transition: transform 0.3s;
         }}
-        
+
         .rank-card:hover {{
             transform: translateY(-5px);
         }}
-        
+
         .rank-card.gold {{
             background: linear-gradient(135deg, #f5af19 0%, #f12711 100%);
         }}
-        
+
         .rank-card.silver {{
             background: linear-gradient(135deg, #bdc3c7 0%, #2c3e50 100%);
         }}
-        
+
         .rank-card.bronze {{
             background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
         }}
-        
+
         .rank-medal {{
             font-size: 3rem;
             margin-bottom: 0.5rem;
         }}
-        
+
         .rank-city {{
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 0.5rem;
         }}
-        
+
         .rank-score {{
             font-size: 1.2rem;
             opacity: 0.9;
         }}
-        
+
         .charts-grid {{
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
             gap: 2rem;
             margin-bottom: 2rem;
         }}
-        
+
         .chart-container {{
             background: #f8f9fa;
             border-radius: 12px;
             padding: 1.5rem;
             height: 400px;
         }}
-        
+
         .chart-title {{
             text-align: center;
             color: var(--dark);
             margin-bottom: 1rem;
             font-size: 1.2rem;
         }}
-        
+
         table {{
             width: 100%;
             border-collapse: collapse;
             margin-top: 1rem;
         }}
-        
+
         th, td {{
             padding: 1rem;
             text-align: left;
             border-bottom: 1px solid #ddd;
         }}
-        
+
         th {{
             background: var(--primary);
             color: white;
         }}
-        
+
         tr:nth-child(even) {{
             background: #f8f9fa;
         }}
-        
+
         tr:hover {{
             background: #e8f4f8;
         }}
-        
+
         .metric {{
             display: inline-block;
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
             font-weight: bold;
         }}
-        
+
         .metric-good {{
             background: #d4edda;
             color: #155724;
         }}
-        
+
         .metric-warning {{
             background: #fff3cd;
             color: #856404;
         }}
-        
+
         .metric-bad {{
             background: #f8d7da;
             color: #721c24;
         }}
-        
+
         .footer {{
             text-align: center;
             color: white;
             margin-top: 2rem;
             opacity: 0.8;
         }}
-        
+
         @media (max-width: 768px) {{
             .charts-grid {{
                 grid-template-columns: 1fr;
             }}
-            
+
             .ranking {{
                 flex-direction: column;
                 align-items: center;
@@ -315,12 +315,12 @@ def _get_html_template() -> str:
         <div class="card">
             <h1>🏙️ City Compare</h1>
             <p class="subtitle">{subtitle}</p>
-            
+
             <div class="ranking">
                 {ranking_cards}
             </div>
         </div>
-        
+
         <div class="card">
             <h2>📊 Visualisations</h2>
             <div class="charts-grid">
@@ -340,23 +340,23 @@ def _get_html_template() -> str:
                 </div>
             </div>
         </div>
-        
+
         <div class="card">
             <h2>📋 Données détaillées</h2>
             {data_table}
         </div>
-        
+
         <div class="card">
             <h2>ℹ️ Configuration</h2>
             <p><strong>Profil utilisé:</strong> {profile}</p>
             <p><strong>Règles de scoring:</strong> {rules}</p>
         </div>
     </div>
-    
+
     <div class="footer">
         <p>Généré par City Compare 🏙️</p>
     </div>
-    
+
     <script>
         // Bar Chart
         const barCtx = document.getElementById('barChart').getContext('2d');
@@ -376,7 +376,7 @@ def _get_html_template() -> str:
                 }}
             }}
         }});
-        
+
         // Radar Chart
         const radarCtx = document.getElementById('radarChart').getContext('2d');
         new Chart(radarCtx, {{
@@ -393,7 +393,7 @@ def _get_html_template() -> str:
                 }}
             }}
         }});
-        
+
         // Weather Chart
         const weatherCtx = document.getElementById('weatherChart').getContext('2d');
         new Chart(weatherCtx, {{

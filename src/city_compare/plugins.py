@@ -27,6 +27,7 @@ Example:
     ```
 """
 
+import contextlib
 import importlib.util
 import sys
 from abc import ABC, abstractmethod
@@ -285,10 +286,8 @@ class PluginManager:
     def cleanup(self) -> None:
         """Clean up all plugins."""
         for plugin in self.data_sources + self.score_modifiers:
-            try:
+            with contextlib.suppress(Exception):
                 plugin.cleanup()
-            except Exception:
-                pass
 
 
 # Global plugin manager instance

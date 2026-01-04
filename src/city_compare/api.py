@@ -13,6 +13,7 @@ from .rent import RentDataError, RentDataParser
 from .scoring import ScoringDSL, ScoringError
 from .weather import OpenMeteoClient, WeatherError
 
+
 # API models
 class CityScore(BaseModel):
     """Score result for a city."""
