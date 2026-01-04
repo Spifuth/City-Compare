@@ -1,0 +1,15 @@
+# Profil "Chasseur de soleil"
+# Pour ceux qui privilégient le beau temps
+
+# Seuil de précipitation pour compter un jour de pluie (en mm)
+rain_threshold_mm: 0.5
+
+# Seuil de température pour compter un jour chaud (en °C)
+# Plus bas pour les personnes sensibles à la chaleur
+hot_threshold_c: 28.0
+
+# Nombre de mois d'historique météo à analyser
+weather_months: 12
+
+# Chemin vers le fichier CSV des loyers
+rent_csv_path: "data/loyers_2025.csv"

@@ -1,0 +1,26 @@
+# Règles de scoring par défaut pour city-compare
+# Score plus élevé = meilleur
+# Variables d'entrée disponibles: rent_m2, avg_temp_c, rain_days, hot_days
+
+# Normalisation du loyer (0-100, inversé: moins cher = mieux)
+# Assume loyers entre 8€ et 25€/m²
+rent_score = clamp((25 - rent_m2) / (25 - 8) * 100, 0, 100)  # Loyer normalisé
+
+# Normalisation de la température (0-100, optimal autour de 15°C)
+# Pénalise les extrêmes
+temp_ideal = 15
+temp_score = clamp(100 - abs(avg_temp_c - temp_ideal) * 5, 0, 100)  # Température normalisée
+
+# Pénalité pour jours de pluie (0-100)
+# Assume max 200 jours de pluie/an
+rain_score = clamp((200 - rain_days) / 200 * 100, 0, 100)  # Pluie normalisée
+
+# Pénalité pour jours très chauds (0-100)
+# Assume max 60 jours chauds/an
+hot_score = clamp((60 - hot_days) / 60 * 100, 0, 100)  # Canicule normalisée
+
+# Score météo combiné
+weather_score = 0.4 * temp_score + 0.35 * rain_score + 0.25 * hot_score  # Météo globale
+
+# Score final: 55% loyer, 45% météo
+score = 0.55 * rent_score + 0.45 * weather_score  # Score final pondéré

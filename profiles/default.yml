@@ -1,0 +1,14 @@
+# Profil par défaut pour city-compare
+# Modifiez ces valeurs selon vos préférences
+
+# Seuil de précipitation pour compter un jour de pluie (en mm)
+rain_threshold_mm: 1.0
+
+# Seuil de température pour compter un jour chaud (en °C)
+hot_threshold_c: 30.0
+
+# Nombre de mois d'historique météo à analyser
+weather_months: 12
+
+# Chemin vers le fichier CSV des loyers (data.gouv)
+rent_csv_path: "data/loyers_2025.csv"

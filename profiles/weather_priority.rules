@@ -1,0 +1,22 @@
+# Règles de scoring priorité météo
+# Pour ceux qui privilégient le climat par rapport au loyer
+# Variables d'entrée: rent_m2, avg_temp_c, rain_days, hot_days
+
+# Normalisation du loyer (0-100, inversé)
+rent_score = clamp((25 - rent_m2) / (25 - 8) * 100, 0, 100)
+
+# Score température (favorise 18°C, climat doux)
+temp_ideal = 18
+temp_score = clamp(100 - abs(avg_temp_c - temp_ideal) * 4, 0, 100)
+
+# Forte pénalité pour la pluie
+rain_score = clamp((150 - rain_days) / 150 * 100, 0, 100)
+
+# Pénalité modérée pour la chaleur
+hot_score = clamp((40 - hot_days) / 40 * 100, 0, 100)
+
+# Score météo avec forte pondération pluie
+weather_score = 0.3 * temp_score + 0.5 * rain_score + 0.2 * hot_score
+
+# Score final: 30% loyer, 70% météo
+score = 0.30 * rent_score + 0.70 * weather_score
