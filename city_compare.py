@@ -13,6 +13,10 @@ from pathlib import Path
 import requests
 import yaml
 
+# Thresholds for metrics
+RAIN_THRESHOLD_MM = 1.0  # Minimum precipitation to count as a rainy day
+HOT_DAY_THRESHOLD_CELSIUS = 30.0  # Temperature threshold for counting hot days
+
 
 class GeocodingCache:
     """Cache for Nominatim geocoding results with rate limiting"""
@@ -186,11 +190,11 @@ class MetricsCalculator:
         valid_temps = [t for t in temps if t is not None]
         avg_temp = sum(valid_temps) / len(valid_temps) if valid_temps else 0
         
-        # Number of rainy days (precipitation > 1mm)
-        rainy_days = sum(1 for p in precip if p is not None and p > 1.0)
+        # Number of rainy days (precipitation > threshold)
+        rainy_days = sum(1 for p in precip if p is not None and p > RAIN_THRESHOLD_MM)
         
-        # Number of days > 30°C
-        hot_days = sum(1 for t in temp_max if t is not None and t > 30.0)
+        # Number of days above hot day threshold
+        hot_days = sum(1 for t in temp_max if t is not None and t > HOT_DAY_THRESHOLD_CELSIUS)
         
         return {
             'avg_temp': round(avg_temp, 1),
