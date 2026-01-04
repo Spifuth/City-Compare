@@ -18,7 +18,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-cache/
+cache/*.json
+!cache/Paris.json
+!cache/Lyon.json
+!cache/Toulouse.json
+!cache/Marseille.json
 report.md
 summary.json
 venv/
