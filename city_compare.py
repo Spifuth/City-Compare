@@ -5,6 +5,7 @@ City Compare CLI - Compare two French cities
 import argparse
 import json
 import os
+import random
 import sys
 import time
 from datetime import datetime, timedelta
@@ -99,7 +100,10 @@ class WeatherFetcher:
     
     def _get_demo_weather(self, lat, lon):
         """Generate demo weather data for testing"""
-        import random
+        # Constants for seasonal calculations
+        DAYS_IN_YEAR = 365
+        SEASONAL_VARIATION_AMPLITUDE = 8
+        SUMMER_SOLSTICE_DAY = 180
         
         # Generate realistic weather data based on latitude
         # Southern France: warmer, less rain
@@ -110,10 +114,10 @@ class WeatherFetcher:
         precips = []
         temp_maxs = []
         
-        for i in range(365):
+        for i in range(DAYS_IN_YEAR):
             # Seasonal variation
             day_of_year = i
-            seasonal_factor = -8 * (1 - 2 * abs((day_of_year - 180) / 365))
+            seasonal_factor = -SEASONAL_VARIATION_AMPLITUDE * (1 - 2 * abs((day_of_year - SUMMER_SOLSTICE_DAY) / DAYS_IN_YEAR))
             
             daily_temp = base_temp + seasonal_factor + random.uniform(-3, 3)
             temps.append(round(daily_temp, 1))
@@ -179,7 +183,8 @@ class MetricsCalculator:
         temp_max = daily.get('temperature_2m_max', [])
         
         # Average temperature
-        avg_temp = sum(t for t in temps if t is not None) / len([t for t in temps if t is not None]) if temps else 0
+        valid_temps = [t for t in temps if t is not None]
+        avg_temp = sum(valid_temps) / len(valid_temps) if valid_temps else 0
         
         # Number of rainy days (precipitation > 1mm)
         rainy_days = sum(1 for p in precip if p is not None and p > 1.0)
@@ -236,14 +241,14 @@ class ScoringRulesParser:
             if '->' not in rule:
                 return 0, None
             
-            condition, score_str = rule.split('->')
+            condition, score_str = rule.split('->', 1)
             condition = condition.strip()
             score_value = int(score_str.strip())
             
             # Parse condition
             for op in ['<=', '>=', '<', '>', '==']:
                 if op in condition:
-                    parts = condition.split(op)
+                    parts = condition.split(op, 1)
                     if len(parts) == 2:
                         metric_name = parts[0].strip()
                         threshold = float(parts[1].strip())
