@@ -1,0 +1,24 @@
+# Scoring rules DSL
+# Format: metric operator value -> score
+# Operators: <, >, <=, >=, ==
+# Metrics: rent, avg_temp, rainy_days, hot_days
+
+# Rent scoring (cheaper is better)
+rent < 15 -> 20
+rent < 20 -> 10
+rent >= 25 -> -10
+
+# Temperature scoring (moderate is better)
+avg_temp > 12 -> 10
+avg_temp > 15 -> 15
+avg_temp < 10 -> -5
+
+# Rain scoring (less rain is better)
+rainy_days < 80 -> 15
+rainy_days < 100 -> 10
+rainy_days > 150 -> -10
+
+# Hot days scoring (fewer extreme heat days is better)
+hot_days < 10 -> 10
+hot_days < 20 -> 5
+hot_days > 40 -> -5

@@ -1,0 +1,5 @@
+# User preferences for city comparison
+preferences:
+  climate: warm  # warm, moderate, cold
+  max_rent: 20   # Maximum acceptable rent in €/m²
+  prefer_dry: true  # Prefer cities with fewer rainy days
