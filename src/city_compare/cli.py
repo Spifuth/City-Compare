@@ -1,7 +1,7 @@
 """Command-line interface for city-compare."""
 
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich.console import Console
@@ -43,7 +43,7 @@ def version_callback(value: bool) -> None:
 @app.callback()
 def main(
     version: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option("--version", "-v", callback=version_callback, is_eager=True),
     ] = None,
 ) -> None:
@@ -72,7 +72,7 @@ def compare(
         typer.Option("--explain", "-e", help="Include detailed scoring explanation"),
     ] = False,
     json_out: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option("--json", "-j", help="Output path for JSON summary"),
     ] = None,
     no_verify_ssl: Annotated[
@@ -87,7 +87,7 @@ def compare(
         city-compare compare "Lille" "Nantes" --profile profiles/default.yml --out report.md
     """
     verify_ssl = not no_verify_ssl
-    
+
     try:
         # Load configuration
         console.print(f"\n[bold blue]🏙️  Comparaison: {city_a} vs {city_b}[/bold blue]\n")
@@ -101,9 +101,9 @@ def compare(
             task = progress.add_task("Chargement du profil...", total=None)
             try:
                 config = ProfileConfig.from_yaml(profile)
-            except FileNotFoundError:
+            except FileNotFoundError as err:
                 console.print(f"[red]❌ Profil introuvable: {profile}[/red]")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from err
             progress.update(task, completed=True)
 
             # Load scoring rules
@@ -112,7 +112,7 @@ def compare(
                 dsl = ScoringDSL(rules_path=rules)
             except ScoringError as e:
                 console.print(f"[red]❌ Erreur dans les règles: {e}[/red]")
-                raise typer.Exit(1)
+                raise typer.Exit(1) from e
             progress.update(task, completed=True)
 
             # Initialize services
@@ -189,7 +189,7 @@ def compare(
 
         # Print summary
         console.print()
-        console.print(f"[bold]Résultat:[/bold]")
+        console.print("[bold]Résultat:[/bold]")
         console.print(f"  {city_a}: [cyan]{score_a_value:.2f}[/cyan]")
         console.print(f"  {city_b}: [cyan]{score_b_value:.2f}[/cyan]")
         console.print(f"  [bold green]🏆 Gagnant: {winner}[/bold green]")
@@ -197,7 +197,7 @@ def compare(
 
     except (GeocodingError, WeatherError, RentDataError, ScoringError) as e:
         console.print(f"[red]❌ Erreur: {e}[/red]")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 def _process_city(

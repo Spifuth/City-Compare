@@ -1,9 +1,9 @@
 """Mini DSL parser and scorer for city comparison."""
 
 import re
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable
 
 
 class ScoringError(Exception):
@@ -57,10 +57,10 @@ class ScoringDSL:
     """
 
     VALID_NAME = re.compile(r"^[a-z_][a-z0-9_]*$")
-    
+
     def __init__(self, rules_path: Path | None = None, rules_text: str | None = None):
         self.rules: list[ScoringRule] = []
-        
+
         if rules_path:
             self._parse_file(rules_path)
         elif rules_text:
@@ -70,7 +70,7 @@ class ScoringDSL:
         """Parse rules from a file."""
         if not path.exists():
             raise ScoringError(f"Fichier de règles introuvable: {path}")
-        
+
         with open(path) as f:
             self._parse_text(f.read())
 
@@ -78,7 +78,7 @@ class ScoringDSL:
         """Parse rules from text."""
         for line_num, line in enumerate(text.splitlines(), 1):
             line = line.strip()
-            
+
             # Skip empty lines and comments
             if not line or line.startswith("#"):
                 continue
@@ -93,8 +93,7 @@ class ScoringDSL:
             # Parse assignment
             if "=" not in line:
                 raise ScoringError(
-                    f"Ligne {line_num}: syntaxe invalide, attendu 'nom = expression'\n"
-                    f"  {line}"
+                    f"Ligne {line_num}: syntaxe invalide, attendu 'nom = expression'\n  {line}"
                 )
 
             name, expression = line.split("=", 1)
@@ -114,9 +113,7 @@ class ScoringDSL:
 
         # Verify 'score' is defined
         if not any(r.name == "score" for r in self.rules):
-            raise ScoringError(
-                "Le fichier de règles doit définir une variable 'score' finale."
-            )
+            raise ScoringError("Le fichier de règles doit définir une variable 'score' finale.")
 
     def evaluate(
         self,
@@ -151,8 +148,7 @@ class ScoringDSL:
                 ctx.variables[rule.name] = value
             except Exception as e:
                 raise ScoringError(
-                    f"Erreur lors de l'évaluation de '{rule.name} = {rule.expression}':\n"
-                    f"  {e}"
+                    f"Erreur lors de l'évaluation de '{rule.name} = {rule.expression}':\n  {e}"
                 ) from e
 
         return ctx.variables["score"], ctx.variables.copy()
@@ -164,11 +160,11 @@ class ScoringDSL:
             **ctx.variables,
             **ctx.functions,
         }
-        
+
         # Validate the expression contains only allowed characters
         allowed = set("0123456789.+-*/() ,_")
         allowed.update(set("abcdefghijklmnopqrstuvwxyz"))
-        
+
         if not all(c in allowed for c in expr):
             invalid = [c for c in expr if c not in allowed]
             raise ScoringError(f"Caractères non autorisés: {invalid}")
@@ -185,7 +181,7 @@ class ScoringDSL:
     def get_explanation(self, variables: dict[str, float]) -> str:
         """Generate a human-readable explanation of the scoring."""
         lines = ["**Calcul du score:**", ""]
-        
+
         # Input variables
         lines.append("*Variables d'entrée:*")
         for name in ["rent_m2", "avg_temp_c", "rain_days", "hot_days"]:
@@ -205,7 +201,7 @@ class ScoringDSL:
 
         # Final score
         score_rule = next(r for r in self.rules if r.name == "score")
-        lines.append(f"*Score final:*")
+        lines.append("*Score final:*")
         lines.append(f"- `score` = **{variables['score']:.2f}**")
         if score_rule.comment:
             lines.append(f"  > {score_rule.comment}")

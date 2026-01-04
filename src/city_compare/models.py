@@ -11,11 +11,19 @@ from pydantic import BaseModel, Field
 class ProfileConfig(BaseModel):
     """Configuration profile for city comparison."""
 
-    rain_threshold_mm: float = Field(default=1.0, description="Precipitation threshold in mm to count as rain day")
-    hot_threshold_c: float = Field(default=30.0, description="Temperature threshold in °C to count as hot day")
-    weather_months: int = Field(default=12, description="Number of months of weather history to analyze")
-    rent_csv_path: Path = Field(default=Path("data/loyers_2025.csv"), description="Path to rent CSV file")
-    
+    rain_threshold_mm: float = Field(
+        default=1.0, description="Precipitation threshold in mm to count as rain day"
+    )
+    hot_threshold_c: float = Field(
+        default=30.0, description="Temperature threshold in °C to count as hot day"
+    )
+    weather_months: int = Field(
+        default=12, description="Number of months of weather history to analyze"
+    )
+    rent_csv_path: Path = Field(
+        default=Path("data/loyers_2025.csv"), description="Path to rent CSV file"
+    )
+
     @classmethod
     def from_yaml(cls, path: Path) -> "ProfileConfig":
         """Load profile from YAML file."""

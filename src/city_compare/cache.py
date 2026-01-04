@@ -43,11 +43,10 @@ class LocalCache:
             value, created_at, ttl = row
 
             # Check expiration if TTL is set
-            if ttl is not None:
-                if time.time() - created_at > ttl:
-                    conn.execute("DELETE FROM cache WHERE key = ?", (key,))
-                    conn.commit()
-                    return None
+            if ttl is not None and time.time() - created_at > ttl:
+                conn.execute("DELETE FROM cache WHERE key = ?", (key,))
+                conn.commit()
+                return None
 
             return json.loads(value)
 

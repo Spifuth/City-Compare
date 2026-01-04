@@ -2,7 +2,7 @@
 
 CLI pour comparer 2 villes françaises et générer un rapport avec un score explicable.
 
-[![CI](https://github.com/YOUR_USERNAME/city-compare/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/city-compare/actions/workflows/ci.yml)
+[![CI](https://github.com/Spifuth/City-Compare/actions/workflows/ci.yml/badge.svg)](https://github.com/Spifuth/City-Compare/actions/workflows/ci.yml)
 
 ## ✨ Fonctionnalités
 
@@ -17,8 +17,8 @@ CLI pour comparer 2 villes françaises et générer un rapport avec un score exp
 
 ```bash
 # Cloner le repo
-git clone https://github.com/YOUR_USERNAME/city-compare.git
-cd city-compare
+git clone https://github.com/Spifuth/City-Compare.git
+cd City-Compare
 
 # Créer un environnement virtuel
 python -m venv .venv

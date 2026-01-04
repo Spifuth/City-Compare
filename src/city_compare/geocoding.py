@@ -1,13 +1,16 @@
 """Geocoding service using Nominatim (OpenStreetMap)."""
 
-import ssl
+import logging
 import time
 from typing import ClassVar
 
 import httpx
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .cache import LocalCache
 from .models import GeoLocation
+
+logger = logging.getLogger(__name__)
 
 
 class GeocodingError(Exception):
@@ -20,7 +23,7 @@ class NominatimGeocoder:
     """Geocoder using Nominatim API with caching and rate limiting."""
 
     BASE_URL: ClassVar[str] = "https://nominatim.openstreetmap.org/search"
-    USER_AGENT: ClassVar[str] = "city-compare/0.1.0 (https://github.com/user/city-compare)"
+    USER_AGENT: ClassVar[str] = "city-compare/0.1.0 (https://github.com/Spifuth/City-Compare)"
     MIN_REQUEST_INTERVAL: ClassVar[float] = 1.0  # Nominatim requires 1 req/s max
 
     def __init__(self, cache: LocalCache | None = None, verify_ssl: bool = True):
@@ -34,6 +37,19 @@ class NominatimGeocoder:
         if elapsed < self.MIN_REQUEST_INTERVAL:
             time.sleep(self.MIN_REQUEST_INTERVAL - elapsed)
         self._last_request_time = time.time()
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(httpx.HTTPError),
+        reraise=True,
+    )
+    def _fetch_geocode(self, params: dict, headers: dict) -> list:
+        """Fetch geocoding data with retry logic."""
+        with httpx.Client(verify=self._verify_ssl) as client:
+            response = client.get(self.BASE_URL, params=params, headers=headers, timeout=10.0)
+            response.raise_for_status()
+            return response.json()
 
     def geocode(self, city_name: str, country: str = "France") -> GeoLocation:
         """
@@ -76,11 +92,10 @@ class NominatimGeocoder:
         headers = {"User-Agent": self.USER_AGENT}
 
         try:
-            with httpx.Client(verify=self._verify_ssl) as client:
-                response = client.get(self.BASE_URL, params=params, headers=headers, timeout=10.0)
-                response.raise_for_status()
-                data = response.json()
+            logger.debug(f"Geocoding: {city_name}, {country}")
+            data = self._fetch_geocode(params, headers)
         except httpx.HTTPError as e:
+            logger.error(f"HTTP error during geocoding: {e}")
             raise GeocodingError(f"HTTP error during geocoding: {e}") from e
 
         if not data:

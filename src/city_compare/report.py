@@ -26,8 +26,13 @@ def generate_markdown_report(
     Returns:
         Markdown formatted report string
     """
+    city_a_name = result.city_a.city_name
+    city_b_name = result.city_b.city_name
+    sep_a = "-" * (len(city_a_name) + 2)
+    sep_b = "-" * (len(city_b_name) + 2)
+
     lines = [
-        f"# Comparaison: {result.city_a.city_name} vs {result.city_b.city_name}",
+        f"# Comparaison: {city_a_name} vs {city_b_name}",
         "",
         f"*Généré le {datetime.now().strftime('%Y-%m-%d à %H:%M')}*",
         "",
@@ -35,12 +40,16 @@ def generate_markdown_report(
         "",
         "## 📊 Résumé",
         "",
-        f"| Métrique | {result.city_a.city_name} | {result.city_b.city_name} |",
-        "|----------|" + "-" * (len(result.city_a.city_name) + 2) + "|" + "-" * (len(result.city_b.city_name) + 2) + "|",
-        f"| 🏠 Loyer (€/m²) | {result.city_a.rent.rent_m2:.2f} | {result.city_b.rent.rent_m2:.2f} |",
-        f"| 🌡️ Temp. moyenne | {result.city_a.weather.avg_temp_c:.1f}°C | {result.city_b.weather.avg_temp_c:.1f}°C |",
-        f"| 🌧️ Jours de pluie | {result.city_a.weather.rain_days} | {result.city_b.weather.rain_days} |",
-        f"| ☀️ Jours chauds (>30°C) | {result.city_a.weather.hot_days} | {result.city_b.weather.hot_days} |",
+        f"| Métrique | {city_a_name} | {city_b_name} |",
+        f"|----------|{sep_a}|{sep_b}|",
+        f"| 🏠 Loyer (€/m²) | {result.city_a.rent.rent_m2:.2f} "
+        f"| {result.city_b.rent.rent_m2:.2f} |",
+        f"| 🌡️ Temp. moyenne | {result.city_a.weather.avg_temp_c:.1f}°C "
+        f"| {result.city_b.weather.avg_temp_c:.1f}°C |",
+        f"| 🌧️ Jours de pluie | {result.city_a.weather.rain_days} "
+        f"| {result.city_b.weather.rain_days} |",
+        f"| ☀️ Jours chauds (>30°C) | {result.city_a.weather.hot_days} "
+        f"| {result.city_b.weather.hot_days} |",
         f"| 📈 **Score** | **{result.score_a.score:.2f}** | **{result.score_b.score:.2f}** |",
         "",
         "---",
@@ -69,36 +78,42 @@ def generate_markdown_report(
 
     # Detailed explanation
     if explain:
-        lines.extend([
-            "## 🔍 Explication détaillée",
+        lines.extend(
+            [
+                "## 🔍 Explication détaillée",
+                "",
+                f"### {result.city_a.city_name}",
+                "",
+                dsl_explanation_a,
+                "",
+                f"### {result.city_b.city_name}",
+                "",
+                dsl_explanation_b,
+                "",
+                "---",
+                "",
+            ]
+        )
+
+    # Additional details
+    lines.extend(
+        [
+            "## 📍 Localisation",
             "",
-            f"### {result.city_a.city_name}",
-            "",
-            dsl_explanation_a,
-            "",
-            f"### {result.city_b.city_name}",
-            "",
-            dsl_explanation_b,
+            f"- **{result.city_a.city_name}**: "
+            f"{result.city_a.geo.lat:.4f}, {result.city_a.geo.lon:.4f}",
+            f"- **{result.city_b.city_name}**: "
+            f"{result.city_b.geo.lat:.4f}, {result.city_b.geo.lon:.4f}",
             "",
             "---",
             "",
-        ])
-
-    # Additional details
-    lines.extend([
-        "## 📍 Localisation",
-        "",
-        f"- **{result.city_a.city_name}**: {result.city_a.geo.lat:.4f}, {result.city_a.geo.lon:.4f}",
-        f"- **{result.city_b.city_name}**: {result.city_b.geo.lat:.4f}, {result.city_b.geo.lon:.4f}",
-        "",
-        "---",
-        "",
-        "## ⚙️ Configuration",
-        "",
-        f"- Profil: `{result.profile_used}`",
-        f"- Règles: `{result.rules_used}`",
-        "",
-    ])
+            "## ⚙️ Configuration",
+            "",
+            f"- Profil: `{result.profile_used}`",
+            f"- Règles: `{result.rules_used}`",
+            "",
+        ]
+    )
 
     return "\n".join(lines)
 

@@ -1,12 +1,16 @@
 """Weather data service using Open-Meteo archive API."""
 
+import logging
 from datetime import date, timedelta
 from typing import ClassVar
 
 import httpx
+from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
 
 from .cache import LocalCache
-from .models import GeoLocation, WeatherMetrics, ProfileConfig
+from .models import GeoLocation, ProfileConfig, WeatherMetrics
+
+logger = logging.getLogger(__name__)
 
 
 class WeatherError(Exception):
@@ -24,6 +28,19 @@ class OpenMeteoClient:
     def __init__(self, cache: LocalCache | None = None, verify_ssl: bool = True):
         self.cache = cache or LocalCache()
         self._verify_ssl = verify_ssl
+
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=2, max=10),
+        retry=retry_if_exception_type(httpx.HTTPError),
+        reraise=True,
+    )
+    def _fetch_weather(self, params: dict) -> dict:
+        """Fetch weather data with retry logic."""
+        with httpx.Client(verify=self._verify_ssl) as client:
+            response = client.get(self.BASE_URL, params=params, timeout=30.0)
+            response.raise_for_status()
+            return response.json()
 
     def get_weather(
         self,
@@ -65,11 +82,10 @@ class OpenMeteoClient:
         }
 
         try:
-            with httpx.Client(verify=self._verify_ssl) as client:
-                response = client.get(self.BASE_URL, params=params, timeout=30.0)
-                response.raise_for_status()
-                data = response.json()
+            logger.debug(f"Fetching weather for {location.lat:.4f}, {location.lon:.4f}")
+            data = self._fetch_weather(params)
         except httpx.HTTPError as e:
+            logger.error(f"HTTP error fetching weather data: {e}")
             raise WeatherError(f"HTTP error fetching weather data: {e}") from e
 
         if "daily" not in data:

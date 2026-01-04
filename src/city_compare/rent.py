@@ -48,7 +48,7 @@ class RentDataParser:
                 # Try to detect the delimiter
                 sample = f.read(2048)
                 f.seek(0)
-                
+
                 dialect = csv.Sniffer().sniff(sample, delimiters=",;\t")
                 reader = csv.DictReader(f, dialect=dialect)
 
