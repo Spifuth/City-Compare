@@ -51,6 +51,7 @@ packages = ["src/city_compare"]
 target-version = "py311"
 line-length = 100
 src = ["src"]
+extend-exclude = ["src/city_compare/completion.py"]  # Shell scripts have specific formatting
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
