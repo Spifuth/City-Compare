@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -44,12 +44,15 @@ class NominatimGeocoder:
         retry=retry_if_exception_type(httpx.HTTPError),
         reraise=True,
     )
-    def _fetch_geocode(self, params: dict, headers: dict) -> list:
+    def _fetch_geocode(
+        self, params: dict[str, Any], headers: dict[str, str]
+    ) -> list[dict[str, Any]]:
         """Fetch geocoding data with retry logic."""
         with httpx.Client(verify=self._verify_ssl) as client:
             response = client.get(self.BASE_URL, params=params, headers=headers, timeout=10.0)
             response.raise_for_status()
-            return response.json()
+            result: list[dict[str, Any]] = response.json()
+            return result
 
     def geocode(self, city_name: str, country: str = "France") -> GeoLocation:
         """

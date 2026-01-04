@@ -26,7 +26,7 @@ class ScoringContext:
     """Context for evaluating scoring expressions."""
 
     variables: dict[str, float] = field(default_factory=dict)
-    functions: dict[str, Callable] = field(default_factory=dict)
+    functions: dict[str, Callable[..., float]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         # Built-in functions

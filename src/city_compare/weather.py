@@ -2,7 +2,7 @@
 
 import logging
 from datetime import date, timedelta
-from typing import ClassVar
+from typing import Any, ClassVar
 
 import httpx
 from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_exponential
@@ -35,12 +35,13 @@ class OpenMeteoClient:
         retry=retry_if_exception_type(httpx.HTTPError),
         reraise=True,
     )
-    def _fetch_weather(self, params: dict) -> dict:
+    def _fetch_weather(self, params: dict[str, Any]) -> dict[str, Any]:
         """Fetch weather data with retry logic."""
         with httpx.Client(verify=self._verify_ssl) as client:
             response = client.get(self.BASE_URL, params=params, timeout=30.0)
             response.raise_for_status()
-            return response.json()
+            result: dict[str, Any] = response.json()
+            return result
 
     def get_weather(
         self,
@@ -98,7 +99,7 @@ class OpenMeteoClient:
 
     def _compute_metrics(
         self,
-        daily_data: dict,
+        daily_data: dict[str, Any],
         profile: ProfileConfig,
     ) -> WeatherMetrics:
         """Compute metrics from daily weather data."""

@@ -3,6 +3,7 @@
 import csv
 import re
 from pathlib import Path
+from typing import Any
 
 from .models import RentMetrics
 
@@ -18,7 +19,7 @@ class RentDataParser:
 
     def __init__(self, csv_path: Path):
         self.csv_path = csv_path
-        self._data: dict[str, dict] = {}
+        self._data: dict[str, dict[str, Any]] = {}
         self._loaded = False
 
     def _normalize_city_name(self, name: str) -> str:
