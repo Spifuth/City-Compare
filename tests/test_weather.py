@@ -3,7 +3,6 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import httpx
 import pytest
 
 from city_compare.cache import LocalCache
@@ -139,9 +138,7 @@ class TestOpenMeteoClient:
         assert metrics.rain_days == 1  # only 2.5 >= 1.0 (0.5 < 1.0)
         assert metrics.hot_days == 0
 
-    def test_weather_error_on_empty_data(
-        self, mock_cache: LocalCache, profile: ProfileConfig
-    ):
+    def test_weather_error_on_empty_data(self, mock_cache: LocalCache, profile: ProfileConfig):
         """Test that WeatherError is raised when no temperature data."""
         client = OpenMeteoClient(cache=mock_cache)
 
@@ -154,4 +151,3 @@ class TestOpenMeteoClient:
 
         with pytest.raises(WeatherError, match="No temperature data"):
             client._compute_metrics(daily_data, profile)
-

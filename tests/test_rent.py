@@ -1,11 +1,10 @@
 """Tests for rent data parsing."""
 
-import tempfile
 from pathlib import Path
 
 import pytest
 
-from city_compare.rent import RentDataParser, RentDataError
+from city_compare.rent import RentDataError, RentDataParser
 
 
 class TestRentDataParser:
@@ -22,7 +21,7 @@ Lyon,14.2,69
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         rent = parser.get_rent("Lille")
         assert rent.rent_m2 == 12.5
         assert rent.city_name == "Lille"
@@ -38,7 +37,7 @@ Bordeaux;12.9;33
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         rent = parser.get_rent("Marseille")
         assert rent.rent_m2 == 13.1
 
@@ -51,7 +50,7 @@ Toulouse;11,5;31
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         rent = parser.get_rent("Toulouse")
         assert rent.rent_m2 == 11.5
 
@@ -64,14 +63,14 @@ Lille,12.5,59
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         with pytest.raises(RentDataError, match="non trouvée"):
             parser.get_rent("Inconnu")
 
     def test_file_not_found(self, tmp_path: Path):
         """Test error when CSV file doesn't exist."""
         parser = RentDataParser(tmp_path / "nonexistent.csv")
-        
+
         with pytest.raises(RentDataError, match="introuvable"):
             parser.get_rent("Lille")
 
@@ -84,7 +83,7 @@ LILLE,12.5,59
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         rent = parser.get_rent("lille")
         assert rent.rent_m2 == 12.5
 
@@ -97,7 +96,7 @@ Saint-Étienne,10.5,42
         csv_file.write_text(csv_content)
 
         parser = RentDataParser(csv_file)
-        
+
         rent = parser.get_rent("Saint Étienne")
         assert rent.rent_m2 == 10.5
 
@@ -113,7 +112,7 @@ Lyon,14.2,69
 
         parser = RentDataParser(csv_file)
         cities = parser.list_cities()
-        
+
         assert len(cities) == 3
         assert "Lille" in cities
         assert "Nantes" in cities

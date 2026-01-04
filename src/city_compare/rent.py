@@ -2,6 +2,7 @@
 
 import csv
 import re
+from difflib import SequenceMatcher, get_close_matches
 from pathlib import Path
 from typing import Any
 
@@ -153,12 +154,77 @@ class RentDataParser:
                 "Utilisez le nom exact de la commune."
             )
 
+        # Try fuzzy matching
+        suggestions = self._find_similar_cities(normalized, n=5)
+        if suggestions:
+            suggestion_text = "\n".join(f"  - {s}" for s in suggestions)
+            raise RentDataError(
+                f"Commune '{city_name}' non trouvée.\nVouliez-vous dire ?\n{suggestion_text}"
+            )
+
         # No match found
         raise RentDataError(
             f"Commune '{city_name}' non trouvée dans le fichier des loyers.\n"
             "Vérifiez l'orthographe ou utilisez le nom officiel de la commune.\n"
             f"Fichier utilisé: {self.csv_path}"
         )
+
+    def _find_similar_cities(self, query: str, n: int = 5) -> list[str]:
+        """Find cities with similar names using fuzzy matching."""
+        all_normalized = list(self._data.keys())
+
+        # Use difflib's get_close_matches for initial filtering
+        close_matches = get_close_matches(query, all_normalized, n=n * 2, cutoff=0.5)
+
+        # Score and sort by similarity
+        scored = []
+        for match in close_matches:
+            ratio = SequenceMatcher(None, query, match).ratio()
+            scored.append((ratio, self._data[match]["city_name"]))
+
+        # Sort by score descending
+        scored.sort(reverse=True, key=lambda x: x[0])
+
+        return [city for _, city in scored[:n]]
+
+    def search_cities(self, query: str, limit: int = 10) -> list[str]:
+        """
+        Search for cities matching a query (for autocompletion).
+
+        Args:
+            query: Search query
+            limit: Maximum number of results
+
+        Returns:
+            List of matching city names
+        """
+        self._load_data()
+
+        normalized_query = self._normalize_city_name(query)
+        results = []
+
+        # First: prefix matches
+        for key, data in self._data.items():
+            if key.startswith(normalized_query):
+                results.append((0, data["city_name"]))  # Priority 0 for prefix
+
+        # Second: contains matches
+        for key, data in self._data.items():
+            if normalized_query in key and not key.startswith(normalized_query):
+                results.append((1, data["city_name"]))  # Priority 1 for contains
+
+        # Third: fuzzy matches if not enough results
+        if len(results) < limit:
+            fuzzy = self._find_similar_cities(normalized_query, n=limit)
+            existing = {r[1] for r in results}
+            for city in fuzzy:
+                if city not in existing:
+                    results.append((2, city))  # Priority 2 for fuzzy
+
+        # Sort by priority then alphabetically
+        results.sort(key=lambda x: (x[0], x[1]))
+
+        return [city for _, city in results[:limit]]
 
     def list_cities(self) -> list[str]:
         """List all available cities."""

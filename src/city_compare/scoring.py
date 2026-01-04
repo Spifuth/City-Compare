@@ -5,6 +5,8 @@ from collections.abc import Callable
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .ast_parser import SafeExpressionError, SafeExpressionEvaluator
+
 
 class ScoringError(Exception):
     """Raised when scoring rules are invalid or evaluation fails."""
@@ -154,29 +156,12 @@ class ScoringDSL:
         return ctx.variables["score"], ctx.variables.copy()
 
     def _eval_expression(self, expr: str, ctx: ScoringContext) -> float:
-        """Safely evaluate an expression."""
-        # Build safe evaluation namespace
-        namespace = {
-            **ctx.variables,
-            **ctx.functions,
-        }
-
-        # Validate the expression contains only allowed characters
-        allowed = set("0123456789.+-*/() ,_")
-        allowed.update(set("abcdefghijklmnopqrstuvwxyz"))
-
-        if not all(c in allowed for c in expr):
-            invalid = [c for c in expr if c not in allowed]
-            raise ScoringError(f"Caractères non autorisés: {invalid}")
-
+        """Safely evaluate an expression using AST parser."""
+        evaluator = SafeExpressionEvaluator(ctx.variables, ctx.functions)
         try:
-            # Use eval with restricted namespace (no builtins)
-            result = eval(expr, {"__builtins__": {}}, namespace)
-            return float(result)
-        except NameError as e:
-            raise ScoringError(f"Variable inconnue: {e}") from e
-        except Exception as e:
-            raise ScoringError(f"Expression invalide: {e}") from e
+            return evaluator.evaluate(expr)
+        except SafeExpressionError as e:
+            raise ScoringError(str(e)) from e
 
     def get_explanation(self, variables: dict[str, float]) -> str:
         """Generate a human-readable explanation of the scoring."""

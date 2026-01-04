@@ -64,6 +64,19 @@ class RentMetrics:
 
 
 @dataclass
+class AirQualityData:
+    """Air quality data for a city (optional)."""
+
+    aqi_avg: float
+    pm2_5_avg: float
+    pm10_avg: float
+    good_days: int
+    moderate_days: int
+    unhealthy_days: int
+    quality_label: str = ""
+
+
+@dataclass
 class CityMetrics:
     """All metrics for a city."""
 
@@ -71,10 +84,11 @@ class CityMetrics:
     geo: GeoLocation
     weather: WeatherMetrics
     rent: RentMetrics
+    air_quality: AirQualityData | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization."""
-        return {
+        result = {
             "city_name": self.city_name,
             "location": {
                 "lat": self.geo.lat,
@@ -91,6 +105,17 @@ class CityMetrics:
                 "max_temp_c": self.weather.max_temp_c,
             },
         }
+        if self.air_quality:
+            result["air_quality"] = {
+                "aqi_avg": self.air_quality.aqi_avg,
+                "pm2_5_avg": self.air_quality.pm2_5_avg,
+                "pm10_avg": self.air_quality.pm10_avg,
+                "good_days": self.air_quality.good_days,
+                "moderate_days": self.air_quality.moderate_days,
+                "unhealthy_days": self.air_quality.unhealthy_days,
+                "quality_label": self.air_quality.quality_label,
+            }
+        return result
 
 
 @dataclass
@@ -99,6 +124,7 @@ class ScoringResult:
 
     city_name: str
     score: float
+    rank: int = 0
     variables: dict[str, float] = field(default_factory=dict)
     explanation: str = ""
 
@@ -114,3 +140,33 @@ class ComparisonResult:
     winner: str
     profile_used: str
     rules_used: str
+
+
+@dataclass
+class MultiComparisonResult:
+    """Full comparison result between multiple cities."""
+
+    cities: list[CityMetrics]
+    scores: list[ScoringResult]
+    ranking: list[str]  # City names in order of score (best first)
+    profile_used: str
+    rules_used: str
+
+    @property
+    def winner(self) -> str:
+        """Return the top-ranked city."""
+        return self.ranking[0] if self.ranking else ""
+
+    def get_city_metrics(self, city_name: str) -> CityMetrics | None:
+        """Get metrics for a specific city."""
+        for city in self.cities:
+            if city.city_name == city_name:
+                return city
+        return None
+
+    def get_city_score(self, city_name: str) -> ScoringResult | None:
+        """Get score for a specific city."""
+        for score in self.scores:
+            if score.city_name == city_name:
+                return score
+        return None

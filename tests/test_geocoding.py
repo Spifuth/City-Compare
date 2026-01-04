@@ -3,11 +3,10 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import httpx
 import pytest
 
 from city_compare.cache import LocalCache
-from city_compare.geocoding import NominatimGeocoder, GeocodingError
+from city_compare.geocoding import GeocodingError, NominatimGeocoder
 
 
 class TestNominatimGeocoder:
@@ -102,6 +101,7 @@ class TestNominatimGeocoder:
 
         # Simulate a recent request
         import time
+
         geocoder._last_request_time = time.time()
 
         start = time.time()
@@ -131,4 +131,3 @@ class TestNominatimGeocoder:
         """Test that the User-Agent is properly configured."""
         assert "city-compare" in NominatimGeocoder.USER_AGENT
         assert "Spifuth" in NominatimGeocoder.USER_AGENT
-
