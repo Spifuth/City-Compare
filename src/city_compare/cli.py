@@ -308,27 +308,6 @@ def clear_cache() -> None:
 
 
 @app.command()
-def tui(
-    profile: Annotated[
-        Path,
-        typer.Option("--profile", "-p", help="Path to profile YAML file"),
-    ] = Path("profiles/default.yml"),
-    rules: Annotated[
-        Path,
-        typer.Option("--rules", "-r", help="Path to scoring rules file"),
-    ] = Path("profiles/default.rules"),
-) -> None:
-    """
-    Launch the interactive TUI (Text User Interface).
-
-    An interactive terminal interface to compare cities.
-    """
-    from .tui import run_tui
-
-    run_tui(profile=profile, rules=rules)
-
-
-@app.command()
 def serve(
     host: Annotated[
         str,

@@ -42,7 +42,7 @@ _city_compare_completions() {
 
     # Commands
     if [[ ${COMP_CWORD} -eq 1 ]]; then
-        COMPREPLY=($(compgen -W "compare clear-cache tui serve --help --version" -- "$cur"))
+        COMPREPLY=($(compgen -W "compare clear-cache serve --help --version" -- "$cur"))
         return
     fi
 
@@ -105,7 +105,6 @@ _city_compare() {
             _values "command" \\
                 "compare[Compare French cities]" \\
                 "clear-cache[Clear the local cache]" \\
-                "tui[Launch interactive TUI]" \\
                 "serve[Start REST API server]" \\
                 "--help[Show help]" \\
                 "--version[Show version]"
@@ -114,9 +113,6 @@ _city_compare() {
             case $line[1] in
                 compare)
                     _city_compare_compare
-                    ;;
-                tui)
-                    _city_compare_tui
                     ;;
                 serve)
                     _city_compare_serve
@@ -143,14 +139,6 @@ _city_compare_compare() {
         "--air-quality[Include air quality]" \\
         "--no-verify-ssl[Disable SSL verification]" \\
         "*:city:_city_compare_cities"
-}
-
-_city_compare_tui() {
-    _arguments \\
-        "-p[Profile file]:profile:_files -g '*.yml'" \\
-        "--profile[Profile file]:profile:_files -g '*.yml'" \\
-        "-r[Rules file]:rules:_files -g '*.rules'" \\
-        "--rules[Rules file]:rules:_files -g '*.rules'"
 }
 
 _city_compare_serve() {
@@ -183,7 +171,6 @@ complete -c city-compare -f
 # Commands
 complete -c city-compare -n "__fish_use_subcommand" -a "compare" -d "Compare French cities"
 complete -c city-compare -n "__fish_use_subcommand" -a "clear-cache" -d "Clear the local cache"
-complete -c city-compare -n "__fish_use_subcommand" -a "tui" -d "Launch interactive TUI"
 complete -c city-compare -n "__fish_use_subcommand" -a "serve" -d "Start REST API server"
 
 # Compare options
@@ -198,10 +185,6 @@ complete -c city-compare -n "__fish_seen_subcommand_from compare" -l no-verify-s
 
 # City completion
 complete -c city-compare -n "__fish_seen_subcommand_from compare; and not __fish_contains_opt -s p -s r -s o -s j" -a "(city-compare complete-city (commandline -ct) 2>/dev/null)"
-
-# TUI options
-complete -c city-compare -n "__fish_seen_subcommand_from tui" -s p -l profile -d "Profile file" -r -F
-complete -c city-compare -n "__fish_seen_subcommand_from tui" -s r -l rules -d "Rules file" -r -F
 
 # Serve options
 complete -c city-compare -n "__fish_seen_subcommand_from serve" -s h -l host -d "Host to bind"

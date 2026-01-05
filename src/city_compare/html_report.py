@@ -527,8 +527,6 @@ def generate_html_report_two_cities(result: ComparisonResult) -> str:
     Returns:
         Complete HTML document as a string.
     """
-    from .models import MultiComparisonResult
-
     # Convert to multi-city format
     scores = sorted(
         [result.score_a, result.score_b],
