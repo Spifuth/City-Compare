@@ -1,14 +1,52 @@
-# Profil par défaut pour city-compare
-# Modifiez ces valeurs selon vos préférences
+# ═══════════════════════════════════════════════════════════════════
+#  🏠 PROFIL ÉQUILIBRÉ (par défaut)
+# ═══════════════════════════════════════════════════════════════════
+#  Un bon compromis entre budget et qualité de vie.
+#  Idéal pour : familles, primo-accédants, personnes sans préférence marquée
+# ═══════════════════════════════════════════════════════════════════
 
-# Seuil de précipitation pour compter un jour de pluie (en mm)
-rain_threshold_mm: 1.0
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  PONDÉRATION DES CRITÈRES (doit totaliser 1.0 = 100%)          │
+# └─────────────────────────────────────────────────────────────────┘
+#
+#  Plus le poids est élevé, plus le critère compte dans le score final.
+#  Exemple: loyer à 0.35 = 35% du score final
 
-# Seuil de température pour compter un jour chaud (en °C)
-hot_threshold_c: 30.0
+weights:
+  # 💰 BUDGET
+  loyer: 0.35              # Prix du loyer au m² (35%)
 
-# Nombre de mois d'historique météo à analyser
-weather_months: 12
+  # ☀️ MÉTÉO
+  ensoleillement: 0.25     # Heures de soleil par an (25%)
+  temperature: 0.20        # Température moyenne annuelle (20%)
+  precipitations: 0.15     # Jours de pluie par an (15%)
 
-# Chemin vers le fichier CSV des loyers (data.gouv)
-rent_csv_path: "data/loyers_2025.csv"
+  # ��️ ENVIRONNEMENT (optionnel, activé avec --air-quality)
+  qualite_air: 0.05        # Indice de qualité de l'air (5%)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  SEUILS ET PRÉFÉRENCES                                         │
+# └─────────────────────────────────────────────────────────────────┘
+
+preferences:
+  # Température idéale (°C) - le score diminue en s'éloignant de cette valeur
+  temperature_ideale: 15
+
+  # Seuil pour considérer un jour comme "pluvieux" (mm)
+  seuil_pluie_mm: 1.0
+
+  # Seuil pour considérer un jour comme "très chaud" (°C)
+  seuil_canicule_c: 30
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  DONNÉES                                                        │
+# └─────────────────────────────────────────────────────────────────┘
+
+data:
+  # Fichier CSV des loyers (source: data.gouv.fr)
+  fichier_loyers: "data/loyers_2025.csv"
+  
+  # Période d'analyse météo (en mois)
+  historique_meteo_mois: 12

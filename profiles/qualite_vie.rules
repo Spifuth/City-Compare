@@ -1,46 +1,67 @@
 # ═══════════════════════════════════════════════════════════════════
-#  ☀️ PROFIL CHASSEUR DE SOLEIL
+#  📐 RÈGLES DE SCORING - QUALITÉ DE VIE
 # ═══════════════════════════════════════════════════════════════════
-#  Priorité absolue à l'ensoleillement et au climat méditerranéen.
-#  Idéal pour : retraités, télétravailleurs, amoureux du soleil
+#
+#  Ces règles favorisent un équilibre climat + air pur.
+#  Idéal pour les familles et personnes sensibles.
+#
 # ═══════════════════════════════════════════════════════════════════
 
-# ┌─────────────────────────────────────────────────────────────────┐
-# │  PONDÉRATION DES CRITÈRES                                       │
-# └─────────────────────────────────────────────────────────────────┘
-
-weights:
-  # 💰 BUDGET (moins important)
-  loyer: 0.20              # Prix du loyer au m² (20%)
-
-  # ☀️ MÉTÉO (priorité maximale = 75%)
-  ensoleillement: 0.40     # Heures de soleil par an (40%) ⭐ PRIORITÉ
-  temperature: 0.20        # Température moyenne annuelle (20%)
-  precipitations: 0.15     # Jours de pluie par an (15%)
-
-  # 🌬️ ENVIRONNEMENT
-  qualite_air: 0.05        # Indice de qualité de l'air (5%)
-
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  SEUILS ET PRÉFÉRENCES                                         │
+# │  🌬️ RÈGLES QUALITÉ DE L'AIR (priorité haute)                    │
 # └─────────────────────────────────────────────────────────────────┘
 
-preferences:
-  # Température idéale plus élevée (climat doux)
-  temperature_ideale: 18
+# Air exceptionnel (AQI < 20) → GROS bonus
+aqi < 20 => bonus(25)
 
-  # Seuil pluie plus strict (même une petite pluie compte)
-  seuil_pluie_mm: 0.5
+# Air excellent (AQI < 30)
+aqi < 30 => bonus(15)
 
-  # Tolérance chaleur plus élevée
-  seuil_canicule_c: 32
+# Air bon (AQI < 40)
+aqi < 40 => bonus(8)
+
+# Air moyen (AQI 50-70) → petite pénalité
+aqi > 50 => penalty(5)
+
+# Air médiocre (AQI > 70) → pénalité
+aqi > 70 => penalty(15)
+
+# Air mauvais (AQI > 100) → grosse pénalité
+aqi > 100 => penalty(30)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  DONNÉES                                                        │
+# │  🌡️ RÈGLES TEMPÉRATURE (modéré, pas d'extrêmes)                 │
 # └─────────────────────────────────────────────────────────────────┘
 
-data:
-  fichier_loyers: "data/loyers_2025.csv"
-  historique_meteo_mois: 12
+# Température idéale pour la santé (12-16°C)
+avg_temp >= 12 and avg_temp <= 16 => bonus(10)
+
+# Trop froid → pénalité (santé)
+avg_temp < 8 => penalty(10)
+
+# Trop chaud → pénalité (canicules)
+avg_temp > 20 => penalty(10)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES ENSOLEILLEMENT                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Bon ensoleillement (vitamine D)
+sunshine_hours > 2000 => bonus(8)
+
+# Manque de soleil (déprime hivernale)
+sunshine_hours < 1700 => penalty(8)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 COMBOS QUALITÉ DE VIE                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Air pur + climat doux = parfait
+aqi < 35 and avg_temp >= 12 and avg_temp <= 18 => bonus(15)
+
+# Ville verte idéale
+aqi < 30 and sunshine_hours > 2000 and precipitation < 900 => bonus(20)

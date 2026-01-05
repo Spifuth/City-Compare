@@ -1,26 +1,63 @@
-# Règles de scoring par défaut pour city-compare
-# Score plus élevé = meilleur
-# Variables d'entrée disponibles: rent_m2, avg_temp_c, rain_days, hot_days
+# ═══════════════════════════════════════════════════════════════════
+#  📐 RÈGLES DE SCORING - PROFIL ÉQUILIBRÉ
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Syntaxe: condition => action
+#
+#  Variables disponibles:
+#    • sunshine_hours : heures d'ensoleillement/an
+#    • avg_temp       : température moyenne (°C)
+#    • precipitation  : précipitations annuelles (mm)
+#    • rent_m2        : loyer médian au m² (€)
+#    • aqi            : indice qualité de l'air (si --air-quality)
+#
+#  Actions:
+#    • bonus(N)   : ajoute N points
+#    • penalty(N) : retire N points
+#
+# ═══════════════════════════════════════════════════════════════════
 
-# Normalisation du loyer (0-100, inversé: moins cher = mieux)
-# Assume loyers entre 8€ et 25€/m²
-rent_score = clamp((25 - rent_m2) / (25 - 8) * 100, 0, 100)  # Loyer normalisé
 
-# Normalisation de la température (0-100, optimal autour de 15°C)
-# Pénalise les extrêmes
-temp_ideal = 15
-temp_score = clamp(100 - abs(avg_temp_c - temp_ideal) * 5, 0, 100)  # Température normalisée
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💰 RÈGLES LOYER                                                │
+# └─────────────────────────────────────────────────────────────────┘
 
-# Pénalité pour jours de pluie (0-100)
-# Assume max 200 jours de pluie/an
-rain_score = clamp((200 - rain_days) / 200 * 100, 0, 100)  # Pluie normalisée
+# Loyer très abordable (< 10€/m²) → gros bonus
+rent_m2 < 10 => bonus(15)
 
-# Pénalité pour jours très chauds (0-100)
-# Assume max 60 jours chauds/an
-hot_score = clamp((60 - hot_days) / 60 * 100, 0, 100)  # Canicule normalisée
+# Loyer abordable (10-15€/m²) → petit bonus
+rent_m2 >= 10 and rent_m2 < 15 => bonus(5)
 
-# Score météo combiné
-weather_score = 0.4 * temp_score + 0.35 * rain_score + 0.25 * hot_score  # Météo globale
+# Loyer élevé (> 20€/m²) → pénalité
+rent_m2 > 20 => penalty(10)
 
-# Score final: 55% loyer, 45% météo
-score = 0.55 * rent_score + 0.45 * weather_score  # Score final pondéré
+# Loyer très élevé (> 25€/m²) → grosse pénalité
+rent_m2 > 25 => penalty(15)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES MÉTÉO                                                │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Très ensoleillé (> 2500h/an) → bonus
+sunshine_hours > 2500 => bonus(10)
+
+# Climat méditerranéen idéal
+sunshine_hours > 2500 and avg_temp > 14 => bonus(5)
+
+# Température douce (12-18°C) → bonus
+avg_temp >= 12 and avg_temp <= 18 => bonus(5)
+
+# Beaucoup de pluie (> 1000mm/an) → pénalité
+precipitation > 1000 => penalty(5)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌬️ RÈGLES QUALITÉ DE L'AIR (si --air-quality)                 │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Air excellent (AQI < 30) → bonus
+aqi < 30 => bonus(5)
+
+# Air pollué (AQI > 70) → pénalité
+aqi > 70 => penalty(10)

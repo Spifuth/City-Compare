@@ -1,8 +1,8 @@
 # ═══════════════════════════════════════════════════════════════════
-#  ☀️ PROFIL CHASSEUR DE SOLEIL
+#  🏖️ PROFIL RETRAITE DORÉE
 # ═══════════════════════════════════════════════════════════════════
-#  Priorité absolue à l'ensoleillement et au climat méditerranéen.
-#  Idéal pour : retraités, télétravailleurs, amoureux du soleil
+#  Climat doux, peu de pluie, températures agréables toute l'année.
+#  Idéal pour : retraités, résidence secondaire, projet de vie au soleil
 # ═══════════════════════════════════════════════════════════════════
 
 # ┌─────────────────────────────────────────────────────────────────┐
@@ -10,16 +10,16 @@
 # └─────────────────────────────────────────────────────────────────┘
 
 weights:
-  # 💰 BUDGET (moins important)
-  loyer: 0.20              # Prix du loyer au m² (20%)
+  # 💰 BUDGET (modéré)
+  loyer: 0.15              # Prix du loyer au m² (15%)
 
-  # ☀️ MÉTÉO (priorité maximale = 75%)
-  ensoleillement: 0.40     # Heures de soleil par an (40%) ⭐ PRIORITÉ
-  temperature: 0.20        # Température moyenne annuelle (20%)
+  # ☀️ MÉTÉO (priorité = 70%)
+  ensoleillement: 0.30     # Heures de soleil par an (30%) ⭐
+  temperature: 0.25        # Température moyenne annuelle (25%) ⭐
   precipitations: 0.15     # Jours de pluie par an (15%)
 
   # 🌬️ ENVIRONNEMENT
-  qualite_air: 0.05        # Indice de qualité de l'air (5%)
+  qualite_air: 0.15        # Indice de qualité de l'air (15%)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
@@ -27,14 +27,13 @@ weights:
 # └─────────────────────────────────────────────────────────────────┘
 
 preferences:
-  # Température idéale plus élevée (climat doux)
-  temperature_ideale: 18
+  # Température douce, confortable pour les seniors
+  temperature_ideale: 17
 
-  # Seuil pluie plus strict (même une petite pluie compte)
   seuil_pluie_mm: 0.5
-
-  # Tolérance chaleur plus élevée
-  seuil_canicule_c: 32
+  
+  # Sensibilité à la chaleur (santé)
+  seuil_canicule_c: 28
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
@@ -44,3 +43,10 @@ preferences:
 data:
   fichier_loyers: "data/loyers_2025.csv"
   historique_meteo_mois: 12
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 VILLES RECOMMANDÉES POUR CE PROFIL                          │
+# └─────────────────────────────────────────────────────────────────┘
+# Nice, Montpellier, Perpignan, Toulon, Aix-en-Provence
+# Conseil: comparez avec --air-quality pour éviter la pollution urbaine

@@ -1,78 +1,94 @@
 # ═══════════════════════════════════════════════════════════════════
-#  📐 RÈGLES DE SCORING - PRIORITÉ MÉTÉO
+#  📐 RÈGLES DE SCORING - RETRAITE DORÉE
 # ═══════════════════════════════════════════════════════════════════
 #
-#  Ces règles favorisent FORTEMENT les villes avec un bon climat.
-#  Le loyer devient secondaire.
-#
-#  Syntaxe: condition => action
+#  Ces règles favorisent le climat méditerranéen doux.
+#  Parfait pour profiter de sa retraite au soleil.
 #
 # ═══════════════════════════════════════════════════════════════════
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  ☀️ RÈGLES ENSOLEILLEMENT (bonus généreux)                      │
+# │  ☀️ RÈGLES ENSOLEILLEMENT (très important)                      │
 # └─────────────────────────────────────────────────────────────────┘
 
-# Ensoleillement exceptionnel (> 2800h) → GROS bonus
+# Ensoleillement exceptionnel (> 2800h) → bonus maximum
 sunshine_hours > 2800 => bonus(25)
 
 # Très bon ensoleillement (> 2500h)
-sunshine_hours > 2500 => bonus(15)
+sunshine_hours > 2500 => bonus(18)
 
-# Bon ensoleillement (> 2000h)
-sunshine_hours > 2000 => bonus(8)
+# Bon ensoleillement (> 2200h)
+sunshine_hours > 2200 => bonus(10)
 
-# Faible ensoleillement (< 1800h) → pénalité
-sunshine_hours < 1800 => penalty(15)
+# Faible ensoleillement → pénalité (moral)
+sunshine_hours < 1900 => penalty(15)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  🌡️ RÈGLES TEMPÉRATURE                                          │
+# │  🌡️ RÈGLES TEMPÉRATURE (douceur prioritaire)                    │
 # └─────────────────────────────────────────────────────────────────┘
 
-# Climat méditerranéen parfait
-avg_temp >= 14 and avg_temp <= 18 => bonus(15)
+# Climat doux parfait pour seniors (15-18°C)
+avg_temp >= 15 and avg_temp <= 18 => bonus(20)
 
-# Climat doux
-avg_temp >= 12 and avg_temp < 14 => bonus(8)
+# Climat agréable (13-15°C)
+avg_temp >= 13 and avg_temp < 15 => bonus(12)
 
-# Climat froid (< 10°C) → pénalité
-avg_temp < 10 => penalty(10)
+# Trop froid → pénalité (articulations, santé)
+avg_temp < 10 => penalty(15)
+
+# Trop chaud → pénalité (canicules dangereuses)
+avg_temp > 20 => penalty(10)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
 # │  🌧️ RÈGLES PRÉCIPITATIONS                                       │
 # └─────────────────────────────────────────────────────────────────┘
 
-# Très sec (< 600mm/an) → bonus
-precipitation < 600 => bonus(15)
+# Climat sec (< 700mm) → bonus (activités extérieures)
+precipitation < 700 => bonus(12)
 
-# Sec (< 800mm/an)
-precipitation < 800 => bonus(8)
+# Pluvieux → pénalité
+precipitation > 900 => penalty(8)
 
-# Pluvieux (> 1000mm/an) → pénalité
-precipitation > 1000 => penalty(10)
-
-# Très pluvieux (> 1200mm/an) → grosse pénalité
-precipitation > 1200 => penalty(15)
+# Très pluvieux → grosse pénalité
+precipitation > 1100 => penalty(15)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  🎯 COMBOS CLIMAT IDÉAL                                         │
+# │  🌬️ RÈGLES QUALITÉ DE L'AIR                                     │
 # └─────────────────────────────────────────────────────────────────┘
 
-# Combo parfait : soleil + doux + sec
-sunshine_hours > 2500 and avg_temp > 14 and precipitation < 800 => bonus(20)
+# Air pur → important pour la santé des seniors
+aqi < 30 => bonus(12)
+aqi < 45 => bonus(6)
 
-# Ville méditerranéenne type
-sunshine_hours > 2700 and avg_temp > 15 => bonus(10)
+# Air pollué → risque santé
+aqi > 60 => penalty(12)
+aqi > 80 => penalty(20)
 
 
 # ┌─────────────────────────────────────────────────────────────────┐
-# │  💰 RÈGLES LOYER (bonus modérés)                                │
+# │  🎯 COMBOS RETRAITE IDÉALE                                      │
 # └─────────────────────────────────────────────────────────────────┘
 
-# Le loyer n'est pas la priorité, mais on garde un petit bonus
+# Côte d'Azur / Méditerranée
+sunshine_hours > 2700 and avg_temp > 15 and precipitation < 800 => bonus(25)
+
+# Sud-Ouest agréable
+sunshine_hours > 2200 and avg_temp >= 13 and avg_temp <= 17 => bonus(15)
+
+# Air pur + soleil = santé
+aqi < 35 and sunshine_hours > 2400 => bonus(15)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💰 RÈGLES LOYER (secondaire mais considéré)                    │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Bonus modéré pour loyers bas
 rent_m2 < 12 => bonus(5)
-rent_m2 > 25 => penalty(5)
+
+# Pénalité légère pour loyers très élevés
+rent_m2 > 20 => penalty(5)
