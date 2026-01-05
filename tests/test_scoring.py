@@ -268,3 +268,137 @@ class TestWeightedScoring:
 
         # 18°C devrait scorer mieux si l'idéal est 18°C
         assert score_18 > score_12
+
+
+class TestConditionalSyntax:
+    """Test conditional syntax (condition => action)."""
+
+    def test_parse_conditional_rules(self):
+        """Test parsing conditional rules."""
+        rules = """
+        # Bonus for low rent
+        rent_m2 < 10 => bonus(15)
+        rent_m2 >= 10 and rent_m2 < 15 => bonus(5)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+        assert len(dsl.conditional_rules) == 2
+        assert dsl._use_conditional_syntax is True
+
+    def test_evaluate_conditional_bonus(self):
+        """Test evaluating bonus conditions."""
+        rules = """
+        rent_m2 < 10 => bonus(15)
+        sunshine_hours > 2500 => bonus(10)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+
+        # Low rent, high sun
+        adjustment, vars = dsl.evaluate(
+            rent_m2=8.0,
+            avg_temp_c=15.0,
+            rain_days=100,
+            hot_days=20,
+            sunshine_hours=2700.0,
+        )
+
+        assert adjustment == 25.0  # 15 + 10
+        assert vars["total_bonus"] == 25.0
+        assert vars["total_penalty"] == 0.0
+
+    def test_evaluate_conditional_penalty(self):
+        """Test evaluating penalty conditions."""
+        rules = """
+        rent_m2 > 20 => penalty(10)
+        aqi > 50 => penalty(5)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+
+        # High rent, bad air
+        adjustment, vars = dsl.evaluate(
+            rent_m2=25.0,
+            avg_temp_c=15.0,
+            rain_days=100,
+            hot_days=20,
+            aqi=60.0,
+        )
+
+        assert adjustment == -15.0  # -10 - 5
+        assert vars["total_penalty"] == 15.0
+
+    def test_evaluate_conditional_mixed(self):
+        """Test evaluating mixed bonus/penalty."""
+        rules = """
+        sunshine_hours > 2500 => bonus(10)
+        rent_m2 > 20 => penalty(5)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+
+        adjustment, vars = dsl.evaluate(
+            rent_m2=22.0,
+            avg_temp_c=15.0,
+            rain_days=100,
+            hot_days=20,
+            sunshine_hours=2700.0,
+        )
+
+        assert adjustment == 5.0  # 10 - 5
+        assert vars["total_bonus"] == 10.0
+        assert vars["total_penalty"] == 5.0
+
+    def test_conditional_with_and_operator(self):
+        """Test conditional rules with 'and' operator."""
+        rules = """
+        sunshine_hours > 2500 and avg_temp > 14 => bonus(20)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+
+        # Both conditions true
+        adjustment, _ = dsl.evaluate(
+            rent_m2=15.0,
+            avg_temp_c=16.0,
+            rain_days=100,
+            hot_days=20,
+            sunshine_hours=2700.0,
+        )
+        assert adjustment == 20.0
+
+        # Only one condition true
+        adjustment, _ = dsl.evaluate(
+            rent_m2=15.0,
+            avg_temp_c=12.0,  # Below 14
+            rain_days=100,
+            hot_days=20,
+            sunshine_hours=2700.0,
+        )
+        assert adjustment == 0.0
+
+    def test_parse_box_drawing_comments(self):
+        """Test that box-drawing characters are skipped."""
+        rules = """
+        # ┌─────────────────────────────────────────┐
+        # │  💰 RÈGLES LOYER                         │
+        # └─────────────────────────────────────────┘
+        rent_m2 < 10 => bonus(15)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+        assert len(dsl.conditional_rules) == 1
+
+    def test_conditional_explanation(self):
+        """Test explanation generation for conditional rules."""
+        rules = """
+        rent_m2 < 10 => bonus(15)
+        sunshine_hours > 2500 => bonus(10)
+        """
+        dsl = ScoringDSL(rules_text=rules)
+
+        adjustment, vars = dsl.evaluate(
+            rent_m2=8.0,
+            avg_temp_c=15.0,
+            rain_days=100,
+            hot_days=20,
+            sunshine_hours=2700.0,
+        )
+
+        explanation = dsl.get_explanation(vars)
+        assert "bonus" in explanation.lower()
+        assert "+25" in explanation
