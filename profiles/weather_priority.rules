@@ -1,0 +1,78 @@
+# ═══════════════════════════════════════════════════════════════════
+#  📐 RÈGLES DE SCORING - PRIORITÉ MÉTÉO
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Ces règles favorisent FORTEMENT les villes avec un bon climat.
+#  Le loyer devient secondaire.
+#
+#  Syntaxe: condition => action
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES ENSOLEILLEMENT (bonus généreux)                      │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Ensoleillement exceptionnel (> 2800h) → GROS bonus
+sunshine_hours > 2800 => bonus(25)
+
+# Très bon ensoleillement (> 2500h)
+sunshine_hours > 2500 => bonus(15)
+
+# Bon ensoleillement (> 2000h)
+sunshine_hours > 2000 => bonus(8)
+
+# Faible ensoleillement (< 1800h) → pénalité
+sunshine_hours < 1800 => penalty(15)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌡️ RÈGLES TEMPÉRATURE                                          │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Climat méditerranéen parfait
+avg_temp >= 14 and avg_temp <= 18 => bonus(15)
+
+# Climat doux
+avg_temp >= 12 and avg_temp < 14 => bonus(8)
+
+# Climat froid (< 10°C) → pénalité
+avg_temp < 10 => penalty(10)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌧️ RÈGLES PRÉCIPITATIONS                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Très sec (< 600mm/an) → bonus
+precipitation < 600 => bonus(15)
+
+# Sec (< 800mm/an)
+precipitation < 800 => bonus(8)
+
+# Pluvieux (> 1000mm/an) → pénalité
+precipitation > 1000 => penalty(10)
+
+# Très pluvieux (> 1200mm/an) → grosse pénalité
+precipitation > 1200 => penalty(15)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 COMBOS CLIMAT IDÉAL                                         │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Combo parfait : soleil + doux + sec
+sunshine_hours > 2500 and avg_temp > 14 and precipitation < 800 => bonus(20)
+
+# Ville méditerranéenne type
+sunshine_hours > 2700 and avg_temp > 15 => bonus(10)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💰 RÈGLES LOYER (bonus modérés)                                │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Le loyer n'est pas la priorité, mais on garde un petit bonus
+rent_m2 < 12 => bonus(5)
+rent_m2 > 25 => penalty(5)

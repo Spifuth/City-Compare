@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════════
+#  🏖️ PROFIL RETRAITE DORÉE
+# ═══════════════════════════════════════════════════════════════════
+#  Climat doux, peu de pluie, températures agréables toute l'année.
+#  Idéal pour : retraités, résidence secondaire, projet de vie au soleil
+# ═══════════════════════════════════════════════════════════════════
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  PONDÉRATION DES CRITÈRES                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+weights:
+  # 💰 BUDGET (modéré)
+  loyer: 0.15              # Prix du loyer au m² (15%)
+
+  # ☀️ MÉTÉO (priorité = 70%)
+  ensoleillement: 0.30     # Heures de soleil par an (30%) ⭐
+  temperature: 0.25        # Température moyenne annuelle (25%) ⭐
+  precipitations: 0.15     # Jours de pluie par an (15%)
+
+  # 🌬️ ENVIRONNEMENT
+  qualite_air: 0.15        # Indice de qualité de l'air (15%)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  SEUILS ET PRÉFÉRENCES                                         │
+# └─────────────────────────────────────────────────────────────────┘
+
+preferences:
+  # Température douce, confortable pour les seniors
+  temperature_ideale: 17
+
+  seuil_pluie_mm: 0.5
+  
+  # Sensibilité à la chaleur (santé)
+  seuil_canicule_c: 28
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  DONNÉES                                                        │
+# └─────────────────────────────────────────────────────────────────┘
+
+data:
+  fichier_loyers: "data/loyers_2025.csv"
+  historique_meteo_mois: 12
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 VILLES RECOMMANDÉES POUR CE PROFIL                          │
+# └─────────────────────────────────────────────────────────────────┘
+# Nice, Montpellier, Perpignan, Toulon, Aix-en-Provence
+# Conseil: comparez avec --air-quality pour éviter la pollution urbaine

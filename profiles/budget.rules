@@ -1,0 +1,54 @@
+# ═══════════════════════════════════════════════════════════════════
+#  📐 RÈGLES DE SCORING - BUDGET SERRÉ
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Ces règles favorisent FORTEMENT les villes avec des loyers bas.
+#  La météo devient secondaire.
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💰 RÈGLES LOYER (bonus très généreux)                          │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Loyer exceptionnel (< 8€/m²) → GROS bonus
+rent_m2 < 8 => bonus(30)
+
+# Loyer très abordable (< 10€/m²)
+rent_m2 < 10 => bonus(20)
+
+# Loyer abordable (< 12€/m²)
+rent_m2 < 12 => bonus(10)
+
+# Loyer correct (< 15€/m²)
+rent_m2 < 15 => bonus(5)
+
+# Loyer élevé (> 18€/m²) → pénalité
+rent_m2 > 18 => penalty(15)
+
+# Loyer très élevé (> 22€/m²) → grosse pénalité
+rent_m2 > 22 => penalty(25)
+
+# Loyer parisien (> 28€/m²) → pénalité maximale
+rent_m2 > 28 => penalty(35)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES MÉTÉO (bonus modérés)                                │
+# └─────────────────────────────────────────────────────────────────┘
+
+# On garde un petit bonus pour le soleil
+sunshine_hours > 2500 => bonus(5)
+
+# Et une petite pénalité pour le climat difficile
+avg_temp < 8 => penalty(5)
+precipitation > 1200 => penalty(5)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 COMBO IDÉAL                                                  │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Ville abordable avec bon climat = jackpot
+rent_m2 < 12 and sunshine_hours > 2000 => bonus(15)

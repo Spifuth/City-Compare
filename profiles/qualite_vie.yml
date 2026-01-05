@@ -1,0 +1,52 @@
+# ═══════════════════════════════════════════════════════════════════
+#  🌿 PROFIL QUALITÉ DE VIE
+# ═══════════════════════════════════════════════════════════════════
+#  Équilibre entre climat agréable et air pur. Budget secondaire.
+#  Idéal pour : familles avec enfants, personnes sensibles, télétravail
+# ═══════════════════════════════════════════════════════════════════
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  PONDÉRATION DES CRITÈRES                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+weights:
+  # 💰 BUDGET
+  loyer: 0.20              # Prix du loyer au m² (20%)
+
+  # ☀️ MÉTÉO
+  ensoleillement: 0.20     # Heures de soleil par an (20%)
+  temperature: 0.20        # Température moyenne annuelle (20%)
+  precipitations: 0.15     # Jours de pluie par an (15%)
+
+  # 🌬️ ENVIRONNEMENT (priorité élevée = 25%)
+  qualite_air: 0.25        # Indice de qualité de l'air (25%) ⭐ PRIORITÉ
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  SEUILS ET PRÉFÉRENCES                                         │
+# └─────────────────────────────────────────────────────────────────┘
+
+preferences:
+  # Température modérée (ni trop chaud, ni trop froid)
+  temperature_ideale: 14
+
+  seuil_pluie_mm: 1.0
+  
+  # Moins tolérant à la chaleur (santé)
+  seuil_canicule_c: 28
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  DONNÉES                                                        │
+# └─────────────────────────────────────────────────────────────────┘
+
+data:
+  fichier_loyers: "data/loyers_2025.csv"
+  historique_meteo_mois: 12
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💡 NOTE                                                        │
+# └─────────────────────────────────────────────────────────────────┘
+# Ce profil nécessite l'option --air-quality pour être pleinement efficace :
+#   city-compare compare "Lyon" "Nantes" --profile profiles/qualite_vie.yml --air-quality

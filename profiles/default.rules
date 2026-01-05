@@ -1,0 +1,63 @@
+# ═══════════════════════════════════════════════════════════════════
+#  📐 RÈGLES DE SCORING - PROFIL ÉQUILIBRÉ
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Syntaxe: condition => action
+#
+#  Variables disponibles:
+#    • sunshine_hours : heures d'ensoleillement/an
+#    • avg_temp       : température moyenne (°C)
+#    • precipitation  : précipitations annuelles (mm)
+#    • rent_m2        : loyer médian au m² (€)
+#    • aqi            : indice qualité de l'air (si --air-quality)
+#
+#  Actions:
+#    • bonus(N)   : ajoute N points
+#    • penalty(N) : retire N points
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  💰 RÈGLES LOYER                                                │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Loyer très abordable (< 10€/m²) → gros bonus
+rent_m2 < 10 => bonus(15)
+
+# Loyer abordable (10-15€/m²) → petit bonus
+rent_m2 >= 10 and rent_m2 < 15 => bonus(5)
+
+# Loyer élevé (> 20€/m²) → pénalité
+rent_m2 > 20 => penalty(10)
+
+# Loyer très élevé (> 25€/m²) → grosse pénalité
+rent_m2 > 25 => penalty(15)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES MÉTÉO                                                │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Très ensoleillé (> 2500h/an) → bonus
+sunshine_hours > 2500 => bonus(10)
+
+# Climat méditerranéen idéal
+sunshine_hours > 2500 and avg_temp > 14 => bonus(5)
+
+# Température douce (12-18°C) → bonus
+avg_temp >= 12 and avg_temp <= 18 => bonus(5)
+
+# Beaucoup de pluie (> 1000mm/an) → pénalité
+precipitation > 1000 => penalty(5)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌬️ RÈGLES QUALITÉ DE L'AIR (si --air-quality)                 │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Air excellent (AQI < 30) → bonus
+aqi < 30 => bonus(5)
+
+# Air pollué (AQI > 70) → pénalité
+aqi > 70 => penalty(10)

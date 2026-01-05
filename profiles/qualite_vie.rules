@@ -1,0 +1,67 @@
+# ═══════════════════════════════════════════════════════════════════
+#  📐 RÈGLES DE SCORING - QUALITÉ DE VIE
+# ═══════════════════════════════════════════════════════════════════
+#
+#  Ces règles favorisent un équilibre climat + air pur.
+#  Idéal pour les familles et personnes sensibles.
+#
+# ═══════════════════════════════════════════════════════════════════
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌬️ RÈGLES QUALITÉ DE L'AIR (priorité haute)                    │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Air exceptionnel (AQI < 20) → GROS bonus
+aqi < 20 => bonus(25)
+
+# Air excellent (AQI < 30)
+aqi < 30 => bonus(15)
+
+# Air bon (AQI < 40)
+aqi < 40 => bonus(8)
+
+# Air moyen (AQI 50-70) → petite pénalité
+aqi > 50 => penalty(5)
+
+# Air médiocre (AQI > 70) → pénalité
+aqi > 70 => penalty(15)
+
+# Air mauvais (AQI > 100) → grosse pénalité
+aqi > 100 => penalty(30)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🌡️ RÈGLES TEMPÉRATURE (modéré, pas d'extrêmes)                 │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Température idéale pour la santé (12-16°C)
+avg_temp >= 12 and avg_temp <= 16 => bonus(10)
+
+# Trop froid → pénalité (santé)
+avg_temp < 8 => penalty(10)
+
+# Trop chaud → pénalité (canicules)
+avg_temp > 20 => penalty(10)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  ☀️ RÈGLES ENSOLEILLEMENT                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Bon ensoleillement (vitamine D)
+sunshine_hours > 2000 => bonus(8)
+
+# Manque de soleil (déprime hivernale)
+sunshine_hours < 1700 => penalty(8)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  🎯 COMBOS QUALITÉ DE VIE                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+# Air pur + climat doux = parfait
+aqi < 35 and avg_temp >= 12 and avg_temp <= 18 => bonus(15)
+
+# Ville verte idéale
+aqi < 30 and sunshine_hours > 2000 and precipitation < 900 => bonus(20)

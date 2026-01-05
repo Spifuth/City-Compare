@@ -1,0 +1,41 @@
+# ═══════════════════════════════════════════════════════════════════
+#  💰 PROFIL BUDGET SERRÉ
+# ═══════════════════════════════════════════════════════════════════
+#  Le loyer est le critère n°1. Qualité de vie secondaire.
+#  Idéal pour : étudiants, jeunes actifs, budgets contraints
+# ═══════════════════════════════════════════════════════════════════
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  PONDÉRATION DES CRITÈRES                                       │
+# └─────────────────────────────────────────────────────────────────┘
+
+weights:
+  # 💰 BUDGET (priorité maximale = 60%)
+  loyer: 0.60              # Prix du loyer au m² (60%) ⭐ PRIORITÉ
+
+  # ☀️ MÉTÉO (moins important)
+  ensoleillement: 0.15     # Heures de soleil par an (15%)
+  temperature: 0.10        # Température moyenne annuelle (10%)
+  precipitations: 0.10     # Jours de pluie par an (10%)
+
+  # 🌬️ ENVIRONNEMENT
+  qualite_air: 0.05        # Indice de qualité de l'air (5%)
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  SEUILS ET PRÉFÉRENCES                                         │
+# └─────────────────────────────────────────────────────────────────┘
+
+preferences:
+  temperature_ideale: 15
+  seuil_pluie_mm: 1.0
+  seuil_canicule_c: 30
+
+
+# ┌─────────────────────────────────────────────────────────────────┐
+# │  DONNÉES                                                        │
+# └─────────────────────────────────────────────────────────────────┘
+
+data:
+  fichier_loyers: "data/loyers_2025.csv"
+  historique_meteo_mois: 12
