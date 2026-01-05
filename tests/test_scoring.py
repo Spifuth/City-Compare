@@ -2,7 +2,7 @@
 
 import pytest
 
-from city_compare.scoring import ScoringDSL, ScoringError
+from city_compare.scoring import DEFAULT_WEIGHTS, ScoringDSL, ScoringError, calculate_weighted_score
 
 
 class TestScoringDSLParsing:
@@ -170,3 +170,101 @@ class TestScoringExplanation:
         assert "rent_score" in explanation
         assert "score" in explanation
         assert "90.00" in explanation  # 100 - 10
+
+
+class TestWeightedScoring:
+    """Test weighted scoring function."""
+
+    def test_default_weights(self):
+        """Test that default weights sum to 1.0."""
+        total = sum(DEFAULT_WEIGHTS.values())
+        assert abs(total - 1.0) < 0.01
+
+    def test_calculate_weighted_score_basic(self):
+        """Test basic weighted score calculation."""
+        score, details = calculate_weighted_score(
+            rent_m2=12.0,
+            sunshine_hours=2000.0,
+            avg_temp=15.0,  # Température idéale
+            precipitation=800.0,
+        )
+
+        # Score devrait être entre 0 et 100
+        assert 0 <= score <= 100
+        assert "final_score" in details
+        assert details["final_score"] == score
+
+    def test_calculate_weighted_score_with_custom_weights(self):
+        """Test with custom weights prioritizing sun."""
+        weights = {
+            "rent_m2": 0.10,
+            "sunshine_hours": 0.60,  # Priorité soleil
+            "avg_temp": 0.15,
+            "precipitation": 0.10,
+            "air_quality": 0.05,
+        }
+
+        # Ville ensoleillée
+        score_sunny, _ = calculate_weighted_score(
+            rent_m2=15.0,
+            sunshine_hours=2800.0,  # Très ensoleillé
+            avg_temp=16.0,
+            precipitation=600.0,
+            weights=weights,
+        )
+
+        # Ville moins ensoleillée
+        score_cloudy, _ = calculate_weighted_score(
+            rent_m2=15.0,
+            sunshine_hours=1600.0,  # Peu ensoleillé
+            avg_temp=16.0,
+            precipitation=600.0,
+            weights=weights,
+        )
+
+        # Avec poids soleil à 60%, la ville ensoleillée devrait scorer plus haut
+        assert score_sunny > score_cloudy
+
+    def test_calculate_weighted_score_with_air_quality(self):
+        """Test scoring with air quality data."""
+        score_good, details = calculate_weighted_score(
+            rent_m2=12.0,
+            sunshine_hours=2000.0,
+            avg_temp=15.0,
+            precipitation=800.0,
+            air_quality=25.0,  # Bonne qualité
+        )
+
+        score_bad, _ = calculate_weighted_score(
+            rent_m2=12.0,
+            sunshine_hours=2000.0,
+            avg_temp=15.0,
+            precipitation=800.0,
+            air_quality=80.0,  # Mauvaise qualité
+        )
+
+        assert score_good > score_bad
+        assert details["air_score"] == 75.0  # 100 - 25
+
+    def test_calculate_weighted_score_ideal_temp(self):
+        """Test scoring with custom ideal temperature."""
+        # Méditerranéen préfère 18°C
+        score_18, _ = calculate_weighted_score(
+            rent_m2=12.0,
+            sunshine_hours=2500.0,
+            avg_temp=18.0,
+            precipitation=600.0,
+            ideal_temp=18.0,
+        )
+
+        # Nord préfère 12°C
+        score_12, _ = calculate_weighted_score(
+            rent_m2=12.0,
+            sunshine_hours=2500.0,
+            avg_temp=12.0,
+            precipitation=600.0,
+            ideal_temp=18.0,  # Même idéal
+        )
+
+        # 18°C devrait scorer mieux si l'idéal est 18°C
+        assert score_18 > score_12

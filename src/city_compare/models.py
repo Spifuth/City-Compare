@@ -5,12 +5,107 @@ from pathlib import Path
 from typing import Any
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
+
+# ═══════════════════════════════════════════════════════════════════
+#  Mapping des clés françaises vers anglaises (rétrocompatibilité)
+# ═══════════════════════════════════════════════════════════════════
+
+# Mapping pour les poids (weights)
+WEIGHTS_FR_TO_EN = {
+    "loyer": "rent_m2",
+    "ensoleillement": "sunshine_hours",
+    "temperature": "avg_temp",
+    "precipitations": "precipitation",
+    "qualite_air": "air_quality",
+}
+
+# Mapping pour les préférences
+PREFERENCES_FR_TO_EN = {
+    "temperature_ideale": "ideal_temp",
+    "seuil_pluie_mm": "rain_threshold_mm",
+    "seuil_canicule_c": "hot_threshold_c",
+}
+
+# Mapping pour les données
+DATA_FR_TO_EN = {
+    "fichier_loyers": "rent_csv_path",
+    "historique_meteo_mois": "weather_months",
+}
+
+
+class ProfileWeights(BaseModel):
+    """Poids des critères de scoring (doit totaliser 1.0)."""
+
+    rent_m2: float = Field(default=0.35, alias="loyer")
+    sunshine_hours: float = Field(default=0.25, alias="ensoleillement")
+    avg_temp: float = Field(default=0.20, alias="temperature")
+    precipitation: float = Field(default=0.15, alias="precipitations")
+    air_quality: float = Field(default=0.05, alias="qualite_air")
+
+    model_config = {"populate_by_name": True}
+
+    @model_validator(mode="after")
+    def normalize_weights(self) -> "ProfileWeights":
+        """Normalise les poids pour qu'ils totalisent 1.0."""
+        total = (
+            self.rent_m2
+            + self.sunshine_hours
+            + self.avg_temp
+            + self.precipitation
+            + self.air_quality
+        )
+        if abs(total - 1.0) > 0.01:  # Tolérance de 1%
+            # Normaliser
+            self.rent_m2 /= total
+            self.sunshine_hours /= total
+            self.avg_temp /= total
+            self.precipitation /= total
+            self.air_quality /= total
+        return self
+
+    def to_dict(self) -> dict[str, float]:
+        """Retourne les poids sous forme de dictionnaire."""
+        return {
+            "rent_m2": self.rent_m2,
+            "sunshine_hours": self.sunshine_hours,
+            "avg_temp": self.avg_temp,
+            "precipitation": self.precipitation,
+            "air_quality": self.air_quality,
+        }
+
+
+class ProfilePreferences(BaseModel):
+    """Préférences et seuils du profil."""
+
+    ideal_temp: float = Field(default=15.0, alias="temperature_ideale")
+    rain_threshold_mm: float = Field(default=1.0, alias="seuil_pluie_mm")
+    hot_threshold_c: float = Field(default=30.0, alias="seuil_canicule_c")
+
+    model_config = {"populate_by_name": True}
+
+
+class ProfileData(BaseModel):
+    """Configuration des sources de données."""
+
+    rent_csv_path: Path = Field(default=Path("data/loyers_2025.csv"), alias="fichier_loyers")
+    weather_months: int = Field(default=12, alias="historique_meteo_mois")
+
+    model_config = {"populate_by_name": True}
 
 
 class ProfileConfig(BaseModel):
-    """Configuration profile for city comparison."""
+    """Configuration profile for city comparison.
 
+    Supporte les clés en français et en anglais pour la rétrocompatibilité.
+    """
+
+    # Nouveau format structuré
+    weights: ProfileWeights = Field(default_factory=ProfileWeights)
+    preferences: ProfilePreferences = Field(default_factory=ProfilePreferences)
+    data: ProfileData = Field(default_factory=ProfileData)
+
+    # Ancien format (rétrocompatibilité)
     rain_threshold_mm: float = Field(
         default=1.0, description="Precipitation threshold in mm to count as rain day"
     )
@@ -24,12 +119,49 @@ class ProfileConfig(BaseModel):
         default=Path("data/loyers_2025.csv"), description="Path to rent CSV file"
     )
 
+    @model_validator(mode="before")
+    @classmethod
+    def handle_nested_format(cls, values: dict[str, Any]) -> dict[str, Any]:
+        """Gère le nouveau format YAML avec sections imbriquées."""
+        if not isinstance(values, dict):
+            return values
+
+        # Si on a le nouveau format avec 'weights', 'preferences', 'data'
+        if "weights" in values or "preferences" in values or "data" in values:
+            # Extraire les préférences vers le format plat pour rétrocompatibilité
+            if "preferences" in values and isinstance(values["preferences"], dict):
+                prefs = values["preferences"]
+                if "seuil_pluie_mm" in prefs:
+                    values["rain_threshold_mm"] = prefs["seuil_pluie_mm"]
+                if "seuil_canicule_c" in prefs:
+                    values["hot_threshold_c"] = prefs["seuil_canicule_c"]
+
+            # Extraire les données vers le format plat
+            if "data" in values and isinstance(values["data"], dict):
+                data = values["data"]
+                if "fichier_loyers" in data:
+                    values["rent_csv_path"] = data["fichier_loyers"]
+                if "historique_meteo_mois" in data:
+                    values["weather_months"] = data["historique_meteo_mois"]
+
+        return values
+
     @classmethod
     def from_yaml(cls, path: Path) -> "ProfileConfig":
         """Load profile from YAML file."""
         with open(path) as f:
             data = yaml.safe_load(f)
+        if data is None:
+            data = {}
         return cls(**data)
+
+    def get_weights(self) -> dict[str, float]:
+        """Retourne les poids pour le scoring."""
+        return self.weights.to_dict()
+
+    def get_ideal_temp(self) -> float:
+        """Retourne la température idéale."""
+        return self.preferences.ideal_temp
 
 
 @dataclass

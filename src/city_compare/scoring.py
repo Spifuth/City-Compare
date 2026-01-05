@@ -14,6 +14,19 @@ class ScoringError(Exception):
     pass
 
 
+# ═══════════════════════════════════════════════════════════════════
+#  Poids par défaut pour le scoring
+# ═══════════════════════════════════════════════════════════════════
+
+DEFAULT_WEIGHTS = {
+    "rent_m2": 0.35,
+    "sunshine_hours": 0.25,
+    "avg_temp": 0.20,
+    "precipitation": 0.15,
+    "air_quality": 0.05,
+}
+
+
 @dataclass
 class ScoringRule:
     """A single scoring rule from the DSL."""
@@ -38,6 +51,70 @@ class ScoringContext:
             "max": max,
             "abs": abs,
         }
+
+
+def calculate_weighted_score(
+    rent_m2: float,
+    sunshine_hours: float,
+    avg_temp: float,
+    precipitation: float,
+    air_quality: float | None = None,
+    weights: dict[str, float] | None = None,
+    ideal_temp: float = 15.0,
+) -> tuple[float, dict[str, float]]:
+    """Calcule le score pondéré d'une ville.
+
+    Args:
+        rent_m2: Loyer au m²
+        sunshine_hours: Heures d'ensoleillement annuelles
+        avg_temp: Température moyenne annuelle (°C)
+        precipitation: Précipitations annuelles (mm)
+        air_quality: Indice qualité de l'air (optionnel)
+        weights: Poids des critères (utilise DEFAULT_WEIGHTS si None)
+        ideal_temp: Température idéale (défaut: 15°C)
+
+    Returns:
+        Tuple (score_final, détail_scores)
+    """
+    if weights is None:
+        weights = DEFAULT_WEIGHTS.copy()
+
+    # Normalisation des métriques sur 0-100
+    # Loyer: moins cher = mieux (inversé, basé sur 8-25€/m²)
+    rent_score = max(0, min(100, (25 - rent_m2) / (25 - 8) * 100))
+
+    # Ensoleillement: plus = mieux (basé sur 1500-3000h)
+    sun_score = max(0, min(100, (sunshine_hours - 1500) / (3000 - 1500) * 100))
+
+    # Température: proche de l'idéal = mieux
+    temp_diff = abs(avg_temp - ideal_temp)
+    temp_score = max(0, 100 - temp_diff * 8)  # -8 pts par °C d'écart
+
+    # Précipitations: moins = mieux (basé sur 500-1500mm)
+    precip_score = max(0, min(100, (1500 - precipitation) / (1500 - 500) * 100))
+
+    # Qualité de l'air: AQI bas = mieux (basé sur 0-100 AQI)
+    air_score = max(0, 100 - air_quality) if air_quality is not None else 50
+
+    # Calcul du score pondéré
+    score = (
+        weights.get("rent_m2", 0.35) * rent_score
+        + weights.get("sunshine_hours", 0.25) * sun_score
+        + weights.get("avg_temp", 0.20) * temp_score
+        + weights.get("precipitation", 0.15) * precip_score
+        + weights.get("air_quality", 0.05) * air_score
+    )
+
+    details = {
+        "rent_score": rent_score,
+        "sun_score": sun_score,
+        "temp_score": temp_score,
+        "precip_score": precip_score,
+        "air_score": air_score,
+        "final_score": score,
+    }
+
+    return score, details
 
 
 class ScoringDSL:
