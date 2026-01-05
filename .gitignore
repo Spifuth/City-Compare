@@ -55,6 +55,8 @@ data/*.csv
 # Reports (generated)
 report.md
 summary.json
+output.html
+*.html
 
 # OS
 .DS_Store

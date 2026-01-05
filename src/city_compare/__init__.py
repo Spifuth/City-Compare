@@ -1,6 +1,6 @@
 """City Compare - Compare French cities and generate reports with explainable scores."""
 
-__version__ = "0.1.0"
+__version__ = "1.0.0"
 
 from .models import (
     DATA_FR_TO_EN,

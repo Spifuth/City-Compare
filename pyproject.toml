@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "city-compare"
-version = "0.1.0"
+version = "1.0.0"
 description = "CLI pour comparer 2 villes françaises et générer un rapport avec score explicable"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -12,7 +12,7 @@ license = "MIT"
 authors = [{ name = "NL" }]
 keywords = ["cli", "france", "cities", "comparison", "weather", "rent"]
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 5 - Production/Stable",
     "Environment :: Console",
     "Intended Audience :: End Users/Desktop",
     "License :: OSI Approved :: MIT License",
@@ -27,7 +27,6 @@ dependencies = [
     "pyyaml>=6.0",
     "pydantic>=2.0.0",
     "tenacity>=8.0.0",
-    "textual>=0.50.0",
     "fastapi>=0.100.0",
     "uvicorn>=0.20.0",
 ]
@@ -58,6 +57,7 @@ select = ["E", "F", "W", "I", "UP", "B", "C4", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
 "src/city_compare/completion.py" = ["E501"]  # Shell scripts need long lines
+"tests/test_cli_examples.py" = ["E501"]  # Test data has long lines
 
 [tool.mypy]
 python_version = "3.11"

@@ -7,10 +7,7 @@ ensuring each command produces the expected output.
 
 import json
 import re
-import socket
 import tempfile
-import threading
-import time
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
@@ -944,10 +941,10 @@ class TestExample12ExplainOption:
 
         # Report should contain explanation details
         report = output_path.read_text()
-        
+
         # Should have variable explanations
         assert "rent_m2" in report or "Variables" in report
-        
+
         # Should have scoring details (bonus/penalty)
         assert "bonus" in report.lower() or "score" in report.lower()
 
@@ -1142,7 +1139,6 @@ class TestExample17HistoryList:
 
     def test_history_with_entries(self, temp_dir: Path):
         """Test history command with existing entries."""
-        from datetime import datetime
 
         with patch("city_compare.history.ComparisonHistory") as mock_history_class:
             # Create mock history entries
@@ -1189,7 +1185,7 @@ class TestExample18HistoryFilter:
             result = runner.invoke(app, ["history", "--city", "Lyon", "--limit", "10"])
 
             assert result.exit_code == 0
-            
+
             # Verify search was called with correct filters
             mock_history.search.assert_called_once_with(city="Lyon", winner=None, limit=10)
 
@@ -1351,7 +1347,7 @@ class TestConfigCommand:
         result = runner.invoke(app, ["config", "--show"])
 
         assert result.exit_code == 0
-        
+
         # Should output configuration directories info
         assert "Config" in result.output or "Configuration" in result.output
         assert "Data" in result.output or "Cache" in result.output
@@ -1393,7 +1389,7 @@ class TestCompletionCommand:
         result = runner.invoke(app, ["completion", "bash"])
 
         assert result.exit_code == 0
-        
+
         # Valid bash completion script structure
         assert "_city_compare_completions" in result.output or "complete" in result.output
         assert "COMP" in result.output  # Bash completion variables
@@ -1404,7 +1400,7 @@ class TestCompletionCommand:
         result = runner.invoke(app, ["completion", "zsh"])
 
         assert result.exit_code == 0
-        
+
         # Valid zsh completion script structure
         assert "#compdef" in result.output or "compadd" in result.output or "_city" in result.output
 
@@ -1413,7 +1409,7 @@ class TestCompletionCommand:
         result = runner.invoke(app, ["completion", "fish"])
 
         assert result.exit_code == 0
-        
+
         # Valid fish completion script structure
         assert "complete" in result.output
         assert "city-compare" in result.output
@@ -1480,6 +1476,7 @@ class TestServeCommand:
     def test_serve_starts_and_responds(self):
         """Test that the API server app works correctly using TestClient."""
         from fastapi.testclient import TestClient
+
         from city_compare.api import app
 
         # Use FastAPI's TestClient to test without network
@@ -1507,6 +1504,7 @@ class TestServeCommand:
     def test_api_cities_endpoint(self):
         """Test the /cities endpoint."""
         from fastapi.testclient import TestClient
+
         from city_compare.api import app
 
         with patch("city_compare.api.ProfileConfig") as mock_config_class, \
