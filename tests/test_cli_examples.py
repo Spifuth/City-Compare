@@ -1509,10 +1509,22 @@ class TestServeCommand:
         from fastapi.testclient import TestClient
         from city_compare.api import app
 
-        with TestClient(app) as client:
-            response = client.get("/cities")
-            assert response.status_code == 200
-            data = response.json()
-            assert "cities" in data
-            assert "total" in data
-            assert isinstance(data["cities"], list)
+        with patch("city_compare.api.ProfileConfig") as mock_config_class, \
+             patch("city_compare.api.RentDataParser") as mock_parser_class:
+            # Mock the config and parser
+            mock_config = MagicMock()
+            mock_config.rent_csv_path = "fake.csv"
+            mock_config_class.from_yaml.return_value = mock_config
+
+            mock_parser = MagicMock()
+            mock_parser.list_cities.return_value = ["Lyon", "Paris", "Marseille"]
+            mock_parser_class.return_value = mock_parser
+
+            with TestClient(app) as client:
+                response = client.get("/cities")
+                assert response.status_code == 200
+                data = response.json()
+                assert "cities" in data
+                assert "total" in data
+                assert isinstance(data["cities"], list)
+                assert len(data["cities"]) == 3
