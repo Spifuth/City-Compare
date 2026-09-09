@@ -30,6 +30,7 @@ from .report import (
     save_report,
 )
 from .scoring import ScoringDSL, ScoringError
+from .upstream import EX_TEMPFAIL, UpstreamUnavailable
 from .weather import OpenMeteoClient, WeatherError
 
 app = typer.Typer(
@@ -258,6 +259,21 @@ def compare(
             console.print(f"  {medal} {score.city_name}: [cyan]{score.score:.2f}[/cyan]")
         console.print()
 
+    # Ordered on purpose: UpstreamUnavailable is a subclass of the service
+    # errors below, so it has to be caught first or it never matches.
+    except UpstreamUnavailable as e:
+        console.print(f"[yellow]⚠️  Service externe indisponible: {e}[/yellow]")
+        console.print(
+            "[dim]Ce n'est pas une erreur de city-compare. Réessaie plus tard ; "
+            f"le code de sortie {EX_TEMPFAIL} (EX_TEMPFAIL) le signale aux scripts "
+            "et à la CI.[/dim]"
+        )
+        # Deliberately not a partial report. Weather and air quality are scored
+        # dimensions: dropping one silently does not produce a comparison with
+        # a hole in it, it produces a DIFFERENT ranking wearing the same
+        # heading. Failing loudly is the honest outcome; the exit code is what
+        # says whose fault it was.
+        raise typer.Exit(EX_TEMPFAIL) from e
     except (GeocodingError, WeatherError, RentDataError, ScoringError, AirQualityError) as e:
         console.print(f"[red]❌ Erreur: {e}[/red]")
         raise typer.Exit(1) from e

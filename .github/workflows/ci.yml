@@ -88,15 +88,44 @@ jobs:
           echo "Montpellier,13.4,34" >> data/loyers_2025.csv
       
       - name: Generate example report
+        id: report
         run: |
+          set +e
           city-compare compare "Lille" "Nantes" \
             --profile profiles/default.yml \
             --rules profiles/default.rules \
             --out report.md \
             --json summary.json \
             --explain
+          rc=$?
+          set -e
+
+          # This step talks to two third-party services: Nominatim for
+          # geocoding and Open-Meteo for weather and air quality. Both are
+          # already retried three times with exponential backoff inside the
+          # client. When they are still down after that, the run failed for a
+          # reason that is nobody's fault here, and on 2026-09-09 that is
+          # exactly what happened — Open-Meteo returned a 502 and this job went
+          # red with nothing wrong in the code.
+          #
+          # 75 is EX_TEMPFAIL (see src/city_compare/upstream.py): the CLI uses
+          # it, and only it, for "an upstream service was unavailable". Any
+          # other non-zero code is a real failure and must still fail the build
+          # — that half matters more, because the tempting version of this fix
+          # swallows everything and goes green on a genuine bug.
+          if [ "$rc" -eq 75 ]; then
+            echo "::warning title=Upstream service unavailable::Example report skipped - Nominatim or Open-Meteo was unreachable after retries. Nothing in this repository is broken; re-run the job to try again."
+            echo "generated=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "generated=true" >> "$GITHUB_OUTPUT"
+          exit "$rc"
       
       - name: Upload report artifact
+        # Skipped rather than uploading an empty artifact when the run above
+        # was cut short by an outage.
+        if: steps.report.outputs.generated == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: example-report

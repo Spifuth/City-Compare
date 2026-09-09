@@ -9,6 +9,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from .cache import LocalCache
 from .models import GeoLocation
+from .upstream import UpstreamUnavailable, is_transient
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,17 @@ class GeocodingError(Exception):
     """Raised when geocoding fails."""
 
     pass
+
+
+class GeocodingUnavailable(GeocodingError, UpstreamUnavailable):
+    """The service was unreachable — a 5xx, a 429 or a transport failure.
+
+    A subclass of GeocodingError on purpose: every existing `except GeocodingError`
+    still catches it, so nothing that handles this today has to change. What
+    it adds is the ability to tell an outage apart from a request this package
+    got wrong, which is the difference between "retry later" and "fix the
+    code".
+    """
 
 
 class NominatimGeocoder:
@@ -99,7 +111,8 @@ class NominatimGeocoder:
             data = self._fetch_geocode(params, headers)
         except httpx.HTTPError as e:
             logger.error(f"HTTP error during geocoding: {e}")
-            raise GeocodingError(f"HTTP error during geocoding: {e}") from e
+            error_cls = GeocodingUnavailable if is_transient(e) else GeocodingError
+            raise error_cls(f"HTTP error during geocoding: {e}") from e
 
         if not data:
             raise GeocodingError(
