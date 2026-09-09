@@ -4,7 +4,11 @@ on:
   push:
     branches: [main, dev]
   pull_request:
-    branches: [main]
+    # `dev` is here on purpose. Pushes to dev already ran CI, but a *pull
+    # request* targeting dev did not — so a branch protection rule requiring
+    # these checks on dev would wait forever for a report that never comes,
+    # and every PR to dev would be unmergeable with no error to explain it.
+    branches: [main, dev]
 
 jobs:
   lint:
