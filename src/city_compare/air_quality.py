@@ -8,6 +8,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from .cache import LocalCache
 from .models import GeoLocation
+from .upstream import UpstreamUnavailable, is_transient
 
 logger = logging.getLogger(__name__)
 
@@ -16,6 +17,17 @@ class AirQualityError(Exception):
     """Raised when air quality data retrieval fails."""
 
     pass
+
+
+class AirQualityUnavailable(AirQualityError, UpstreamUnavailable):
+    """The service was unreachable — a 5xx, a 429 or a transport failure.
+
+    A subclass of AirQualityError on purpose: every existing `except AirQualityError`
+    still catches it, so nothing that handles this today has to change. What
+    it adds is the ability to tell an outage apart from a request this package
+    got wrong, which is the difference between "retry later" and "fix the
+    code".
+    """
 
 
 class AirQualityMetrics:
@@ -129,7 +141,8 @@ class OpenMeteoAirQualityClient:
             data = self._fetch_air_quality(params)
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching air quality data: {e}")
-            raise AirQualityError(f"HTTP error fetching air quality data: {e}") from e
+            error_cls = AirQualityUnavailable if is_transient(e) else AirQualityError
+            raise error_cls(f"HTTP error fetching air quality data: {e}") from e
 
         if "hourly" not in data:
             raise AirQualityError(f"Invalid response from Open-Meteo Air Quality: {data}")

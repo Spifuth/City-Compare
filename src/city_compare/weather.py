@@ -9,6 +9,7 @@ from tenacity import retry, retry_if_exception_type, stop_after_attempt, wait_ex
 
 from .cache import LocalCache
 from .models import GeoLocation, ProfileConfig, WeatherMetrics
+from .upstream import UpstreamUnavailable, is_transient
 
 logger = logging.getLogger(__name__)
 
@@ -17,6 +18,17 @@ class WeatherError(Exception):
     """Raised when weather data retrieval fails."""
 
     pass
+
+
+class WeatherUnavailable(WeatherError, UpstreamUnavailable):
+    """The service was unreachable — a 5xx, a 429 or a transport failure.
+
+    A subclass of WeatherError on purpose: every existing `except WeatherError`
+    still catches it, so nothing that handles this today has to change. What
+    it adds is the ability to tell an outage apart from a request this package
+    got wrong, which is the difference between "retry later" and "fix the
+    code".
+    """
 
 
 class OpenMeteoClient:
@@ -87,7 +99,8 @@ class OpenMeteoClient:
             data = self._fetch_weather(params)
         except httpx.HTTPError as e:
             logger.error(f"HTTP error fetching weather data: {e}")
-            raise WeatherError(f"HTTP error fetching weather data: {e}") from e
+            error_cls = WeatherUnavailable if is_transient(e) else WeatherError
+            raise error_cls(f"HTTP error fetching weather data: {e}") from e
 
         if "daily" not in data:
             raise WeatherError(f"Invalid response from Open-Meteo: {data}")
